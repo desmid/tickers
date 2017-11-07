@@ -95,21 +95,15 @@ def range2posn(n=''):
     return (name2posn(c), name2posn(r))
 
 def sheet_read_symbols(sheet, posn):
-    data = []
     p = re.compile(r'[A-Z0-9]+\.[A-Z]')
-    for s in sheet_read_column(sheet, posn):
-        if p.match(s):
-            data.append(s)
-    return data
+    return [s for s in sheet_read_column(sheet, posn) if p.match(s)]
 
 def sheet_read_column(sheet, posn):
-    data = []
     ((keycol,rowfirst), (_, rowlast)) = posn
-    for row in range(rowfirst, rowlast+1):
-        key = sheet.getCellByPosition(keycol, row).getString()
-        data.append(key)
-        row += 1
-    return data
+    return [
+        sheet.getCellByPosition(keycol, row).getString()
+        for row in range(rowfirst, rowlast+1)
+    ]
 
 def sheet_clear_columns(sheet, keyrange, datacols, flags=5):
     """
