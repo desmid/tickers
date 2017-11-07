@@ -48,7 +48,7 @@ def get_yahoo_prices_body(XSCRIPTCONTEXT,
     sheet_clear_columns(mySheet, keyrange, datacols)
 
     html = getHtml(make_yahoo_url(symbols))
-    priceDict = createPriceDict(html)
+    priceDict = parseYahooPrices(html)
     sheet_write_columns(mySheet, keyrange, datacols, priceDict)
 
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
@@ -56,6 +56,45 @@ def get_yahoo_prices_body(XSCRIPTCONTEXT,
 def make_yahoo_url(symbols):
     URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
     return URL + 'symbols=' + ','.join(symbols)
+
+def parseYahooPrices(html):
+    m = re.search(r'.*?\[(.*?)\].*', html)
+    if not m: return {}
+    data = m.group(1)
+
+    #priceDict[ticker] = [regularMarketPrice, currency]
+    priceDict = { '%formats' : ['%f', '%s'] }
+
+    while data:
+        m = re.search(r'.*?{(.*?)\}(.*)', data)
+        if not m: break
+
+        symbolData = m.group(1)
+        symbol, price, currency = '', '', ''
+
+        for element in symbolData.split(','):
+            element = element.replace('"','')
+            try:
+                key,val = element.split(':', 1)
+            except:
+                continue
+
+            if 'symbol' == key:
+                symbol = val
+                continue
+
+            if 'regularMarketPrice' == key:
+                price = val
+                continue
+
+            if 'currency' == key:
+                currency = val.replace('GBp', 'GBX')
+                continue
+
+        priceDict[symbol] = [price, currency]
+        data = m.group(2)
+
+    return(priceDict)
 
 ###########################################################################
 # spreadsheet utilities
@@ -261,38 +300,6 @@ def getHtml(myUrl):
         break
 
     return html
-
-def createPriceDict(html):   
-    priceDict = {}
-    matchObj = re.search( r'.*?\[(.*?)\].*', html)
-    data = ''
-    if matchObj:
-        data = matchObj.group(1)
-
-    #priceDict[ticker] = [regularMarketPrice, currency]
-    priceDict['%formats'] = ['%f', '%s']
-        
-    while data:
-        matchObj = re.search( r'.*?{(.*?)\}(.*)', data)
-        if matchObj:
-            symbolData = matchObj.group(1)
-            symbol = ''
-            price = ''
-            currency = ''
-            for symbolElement in symbolData.split(','):
-                symbolElement = symbolElement.replace('"','')
-                if 'symbol' in symbolElement:
-                    symbol = (symbolElement[symbolElement.index(':')+1:])
-                elif 'regularMarketPrice' in symbolElement:
-                    price = (symbolElement[symbolElement.index(':')+1:])
-                elif 'currency' in symbolElement:
-                    currency = (symbolElement[symbolElement.index(':')+1:])
-                    currency = re.sub('GBp', 'GBX', currency)
- 
-            priceDict[symbol] = [price, currency]
-            data = matchObj.group(2)
-
-    return(priceDict)
 
 ###########################################################################
 g_exportedScripts = test_macro, get_yahoo_prices,
