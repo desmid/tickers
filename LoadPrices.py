@@ -26,61 +26,94 @@ def test_macro(XSCRIPTCONTEXT):
     return None
 
 def get_yahoo_prices(*args):
-    get_yahoo_prices_body(XSCRIPTCONTEXT, sheetname='Sheet1', keyrow=1, keycol=0, datacols=[1,2])
+    get_yahoo_prices_body(XSCRIPTCONTEXT, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
     return None
 
 ###########################################################################
 # macro guts
 ###########################################################################
-def get_yahoo_prices_body(XSCRIPTCONTEXT, sheetname, keyrow, keycol, datacols):
+def get_yahoo_prices_body(XSCRIPTCONTEXT, sheetname='Sheet1', keys='A1', datacols=['B']):
+    keys = range2posn(keys)
+    datacols = [name2posn(i)[0] for i in datacols]
+
     doc = XSCRIPTCONTEXT.getDocument()
 
     sheets = doc.getSheets()
     mySheet = sheets.getByName(sheetname)
     priceDict = {}
 
-    symbols = sheet_read_symbols(mySheet, keycol, keyrow)
-    sheet_clear_columns(mySheet, keycol, keyrow, datacols)
+    symbols = sheet_read_symbols(mySheet, keys)
+    sheet_clear_columns(mySheet, keys, datacols)
 
     url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + ','.join(symbols)
     html = getHtml(url)
     priceDict = createPriceDict(html)
 
-    sheet_write_columns(mySheet, keycol, keyrow, datacols, priceDict)
+    sheet_write_columns(mySheet, keys, datacols, priceDict)
 
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 ###########################################################################
 # spreadsheet utilities
 ###########################################################################
-def sheet_read_symbols(sheet, keycol=0, keyrow=0):
+def name2posn(n=''):
+    if isinstance(n, int):
+        if n < 0: n = 0
+        return (n,n)
+    if not isinstance(n, str): return (0,0)
+    n = re.sub('[^A-Z0-9:]', '', str(n).upper())
+    #0-based arithmetic
+    if n is '': n = '1'
+    c,r,ordA = 0,0,ord('A')
+    while len(n) > 0:
+        v = ord(n[0])
+        if v < ordA:
+            r = int(n)
+            break
+        #print(n, v, c, r)
+        c = 26*c + v-ordA+1
+        #print(n, v, c, r)
+        n = n[1:]
+    if c > 0: c -= 1
+    if r > 0: r -= 1
+    return (c,r)
+
+def range2posn(n=''):
+    if isinstance(n, int): return (name2posn(n), name2posn(n))
+    if not isinstance(n, str): return (name2posn(n), name2posn(n))
+    try:
+        c,r = n.split(':')
+    except:
+        c = n.split(':')[0]
+        r = c
+    if c == '': c = '0'
+    if r == '': r = '0'
+    return (name2posn(c), name2posn(r))
+
+def sheet_read_symbols(sheet, posn):
     data = []
     p = re.compile(r'[A-Z0-9]+\.[A-Z]')
-    for s in sheet_read_column(sheet, keycol, keyrow):
+    for s in sheet_read_column(sheet, posn):
         if p.match(s):
             data.append(s)
     return data
 
-def sheet_read_column(sheet, keycol=0, keyrow=0):
+def sheet_read_column(sheet, posn):
     data = []
-    row = keyrow
-    while True:
+    ((keycol,rowfirst), (_, rowlast)) = posn
+    for row in range(rowfirst, rowlast+1):
         key = sheet.getCellByPosition(keycol, row).getString()
-        if len(key) == 0:
-            break
         data.append(key)
         row += 1
     return data
 
-def sheet_clear_columns(sheet, keycol=0, keyrow=0, datacols=[], flags=5):
+def sheet_clear_columns(sheet, keyrange, datacols, flags=5):
     """
     http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
     """
-    row = keyrow
-    while True:
+    ((keycol,rowfirst), (_, rowlast)) = keyrange
+    for row in range(rowfirst, rowlast+1):
         key = sheet.getCellByPosition(keycol, row).getString()
-        if len(key) == 0:
-            break
         for col in datacols:
             cell = sheet.getCellByPosition(col, row)
             item = cell.getString()
@@ -88,19 +121,16 @@ def sheet_clear_columns(sheet, keycol=0, keyrow=0, datacols=[], flags=5):
             cell.clearContents(flags)
         row += 1
 
-def sheet_write_columns(sheet, keycol=0, keyrow=0, datacols=[], datadict={}):
-    formats = datadict['%format']
-    row = keyrow
-    while True:
+def sheet_write_columns(sheet, keyrange, datacols, datadict):
+    ((keycol,rowfirst), (_, rowlast)) = keyrange
+    for row in range(rowfirst, rowlast+1):
         key = sheet.getCellByPosition(keycol, row).getString()
-        if len(key) == 0:
-            break
         try:
             data = datadict[key]
         except KeyError:
             row += 1
             continue
-        for i, col in enumerate(datacols):
+        for i,col in enumerate(datacols):
             cell = sheet.getCellByPosition(col, row)
             if formats[i] == '%f':
                 value = float(data[i])
