@@ -122,6 +122,7 @@ def sheet_clear_columns(sheet, keyrange, datacols, flags=5):
         row += 1
 
 def sheet_write_columns(sheet, keyrange, datacols, datadict):
+    formats = datadict['%formats']
     ((keycol,rowfirst), (_, rowlast)) = keyrange
     for row in range(rowfirst, rowlast+1):
         key = sheet.getCellByPosition(keycol, row).getString()
@@ -141,7 +142,7 @@ def sheet_write_columns(sheet, keyrange, datacols, datadict):
                 #print("write({},{},{})={}".format(col, row, key, value))
                 cell.String = value
             else:
-                value = 'format?'
+                value = str(data[i])
                 #print("write({},{},{})={}".format(col, row, key, value))
                 cell.String = value
         row += 1
@@ -151,7 +152,6 @@ def sheet_write_columns(sheet, keyrange, datacols, datadict):
 ####################################################################################
 
 # Message box test for OO or LO version
-#
 # Uses either messageBoxOO4 or messageBoxLO4. Pretty much pot luck which one
 # works, depending on which version of OpenOffice or LibreOffice is used
 
@@ -270,7 +270,8 @@ def createPriceDict(html):
     if matchObj:
         data = matchObj.group(1)
 
-    priceDict['%format'] = ['%f', '%s']
+    #priceDict[ticker] = [regularMarketPrice, currency]
+    priceDict['%formats'] = ['%f', '%s']
         
     while data:
         matchObj = re.search( r'.*?{(.*?)\}(.*)', data)
@@ -287,6 +288,7 @@ def createPriceDict(html):
                     price = (symbolElement[symbolElement.index(':')+1:])
                 elif 'currency' in symbolElement:
                     currency = (symbolElement[symbolElement.index(':')+1:])
+                    currency = re.sub('GBp', 'GBX', currency)
  
             priceDict[symbol] = [price, currency]
             data = matchObj.group(2)
