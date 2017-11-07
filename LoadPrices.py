@@ -47,8 +47,8 @@ def get_yahoo_prices_body(XSCRIPTCONTEXT,
     symbols = sheet_read_symbols(mySheet, keyrange)
     sheet_clear_columns(mySheet, keyrange, datacols)
 
-    html = getHtml(make_yahoo_url(symbols))
-    priceDict = parseYahooPrices(html)
+    html = get_html(make_yahoo_url(symbols))
+    priceDict = parse_yahoo(html)
     sheet_write_columns(mySheet, keyrange, datacols, priceDict)
 
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
@@ -57,7 +57,7 @@ def make_yahoo_url(symbols):
     URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
     return URL + 'symbols=' + ','.join(symbols)
 
-def parseYahooPrices(html):
+def parse_yahoo(html):
     m = re.search(r'.*?\[(.*?)\].*', html)
     if not m: return {}
     data = m.group(1)
@@ -255,7 +255,7 @@ except:
 
 webTimeOut = 10
 
-def getHtml(myUrl):
+def get_html(url):
     global webTimeOut
     
     try:
@@ -283,11 +283,11 @@ def getHtml(myUrl):
     while True:
         try:
             if sys.version[0] == '3':
-                req = urllib.request.Request(url=myUrl, headers=hdr)
+                req = urllib.request.Request(url=url, headers=hdr)
                 response = urllib.request.urlopen(req)
             else:
                 #data = urllib.urlencode(values)
-                req = urllib2.Request(myUrl, None, hdr)
+                req = urllib2.Request(url, None, hdr)
                 response = urllib2.urlopen(req)
             html = response.read()
             html = html.decode('1252', 'ignore')
