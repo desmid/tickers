@@ -26,13 +26,17 @@ def test_macro(XSCRIPTCONTEXT):
     return None
 
 def get_yahoo_prices(*args):
-    get_yahoo_prices_body(XSCRIPTCONTEXT, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    get_yahoo_prices_body(XSCRIPTCONTEXT,
+                          'Sheet1', keys='A2:A200', datacols=['B', 'C'])
     return None
 
 ###########################################################################
 # macro guts
 ###########################################################################
-def get_yahoo_prices_body(XSCRIPTCONTEXT, sheetname='Sheet1', keys='A1', datacols=['B']):
+YAHOO_URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+
+def get_yahoo_prices_body(XSCRIPTCONTEXT,
+                          sheetname='Sheet1', keys='A2', datacols=['B']):
     keys = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
 
@@ -45,7 +49,7 @@ def get_yahoo_prices_body(XSCRIPTCONTEXT, sheetname='Sheet1', keys='A1', datacol
     symbols = sheet_read_symbols(mySheet, keys)
     sheet_clear_columns(mySheet, keys, datacols)
 
-    url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + ','.join(symbols)
+    url = YAHOO_URL + 'symbols=' + ','.join(symbols)
     html = getHtml(url)
     priceDict = createPriceDict(html)
 
@@ -147,9 +151,10 @@ def sheet_write_columns(sheet, keyrange, datacols, datadict):
                 cell.String = value
         row += 1
 
-####################################################################################
+
+###########################################################################
 # controls
-####################################################################################
+###########################################################################
 
 # Message box test for OO or LO version
 # Uses either messageBoxOO4 or messageBoxLO4. Pretty much pot luck which one
