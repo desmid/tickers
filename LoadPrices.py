@@ -186,7 +186,7 @@ def sheet_write_columns(sheet, keyrange, datacols, datadict):
 
 
 ###########################################################################
-# controls
+# spreadsheet controls
 ###########################################################################
 
 # Message box test for OO or LO version
