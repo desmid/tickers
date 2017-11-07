@@ -33,11 +33,9 @@ def get_yahoo_prices(*args):
 ###########################################################################
 # macro guts
 ###########################################################################
-YAHOO_URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
-
 def get_yahoo_prices_body(XSCRIPTCONTEXT,
-                          sheetname='Sheet1', keys='A2', datacols=['B']):
-    keys = range2posn(keys)
+                          sheetname='Sheet1', keys='A2:A200', datacols=['B']):
+    keyrange = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
 
     doc = XSCRIPTCONTEXT.getDocument()
@@ -46,16 +44,18 @@ def get_yahoo_prices_body(XSCRIPTCONTEXT,
     mySheet = sheets.getByName(sheetname)
     priceDict = {}
 
-    symbols = sheet_read_symbols(mySheet, keys)
-    sheet_clear_columns(mySheet, keys, datacols)
+    symbols = sheet_read_symbols(mySheet, keyrange)
+    sheet_clear_columns(mySheet, keyrange, datacols)
 
-    url = YAHOO_URL + 'symbols=' + ','.join(symbols)
-    html = getHtml(url)
+    html = getHtml(make_yahoo_url(symbols))
     priceDict = createPriceDict(html)
-
-    sheet_write_columns(mySheet, keys, datacols, priceDict)
+    sheet_write_columns(mySheet, keyrange, datacols, priceDict)
 
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
+
+def make_yahoo_url(symbols):
+    URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+    return URL + 'symbols=' + ','.join(symbols)
 
 ###########################################################################
 # spreadsheet utilities
