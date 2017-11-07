@@ -39,113 +39,29 @@ def get_yahoo_prices_body(XSCRIPTCONTEXT, sheetname, keyrow, keycol, datacols):
     mySheet = sheets.getByName(sheetname)
     priceDict = {}
 
-    symbols = sheet_read_symbols(mySheet, keyrow, keycol)
-    sheet_clear_columns(mySheet, keyrow, keycol, datacols)
+    symbols = sheet_read_symbols(mySheet, keycol, keyrow)
+    sheet_clear_columns(mySheet, keycol, keyrow, datacols)
 
     url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + ','.join(symbols)
     html = getHtml(url)
     priceDict = createPriceDict(html)
 
-    sheet_write_columns(mySheet, keyrow, keycol, datacols, priceDict)
+    sheet_write_columns(mySheet, keycol, keyrow, datacols, priceDict)
 
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 ###########################################################################
-# utilities
+# spreadsheet utilities
 ###########################################################################
-import socket
-try:
-    import urllib.request
-except:
-    import urllib
-
-webTimeOut = 10
-
-def getHtml(myUrl):
-    global webTimeOut
-    
-    try:
-        if int(webTimeOut) < 1:
-            webTimeOut = 1
-        else:
-            webTimeOut = int(webTimeOut)
-    except:
-        webTimeOut = 1
-
-    socket.setdefaulttimeout(webTimeOut)    # set default timeout for web query
-
-    hdr = {
-        'User-Agent': 'Mozilla/5.0 AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-        'Accept-Encoding': 'none',
-        'Accept-Language': 'en-US,en;q=0.8',
-        'Connection': 'keep-alive'
-    }
-    
-    attempts = 1
-    html = 'No Response'
-        
-    while True:
-        try:
-            if sys.version[0] == '3':
-                req = urllib.request.Request(url=myUrl, headers=hdr)
-                response = urllib.request.urlopen(req)
-            else:
-                #data = urllib.urlencode(values)
-                req = urllib2.Request(myUrl, None, hdr)
-                response = urllib2.urlopen(req)
-            html = response.read()
-            html = html.decode('1252', 'ignore')
-        except Exception as e:
-            attempts += 1
-            webTimeOut *= 2
-            socket.setdefaulttimeout(webTimeOut)
-            if attempts > 5:
-                break
-        break
-
-    return html
-
-def createPriceDict(html):   
-    priceDict = {}
-    matchObj = re.search( r'.*?\[(.*?)\].*', html)
-    data = ''
-    if matchObj:
-        data = matchObj.group(1)
-
-    priceDict['%format'] = ['%f', '%s']
-        
-    while data:
-        matchObj = re.search( r'.*?{(.*?)\}(.*)', data)
-        if matchObj:
-            symbolData = matchObj.group(1)
-            symbol = ''
-            price = ''
-            currency = ''
-            for symbolElement in symbolData.split(','):
-                symbolElement = symbolElement.replace('"','')
-                if 'symbol' in symbolElement:
-                    symbol = (symbolElement[symbolElement.index(':')+1:])
-                elif 'regularMarketPrice' in symbolElement:
-                    price = (symbolElement[symbolElement.index(':')+1:])
-                elif 'currency' in symbolElement:
-                    currency = (symbolElement[symbolElement.index(':')+1:])
- 
-            priceDict[symbol] = [price, currency]
-            data = matchObj.group(2)
-
-    return(priceDict)
-
-def sheet_read_symbols(sheet, keyrow=0, keycol=0):
+def sheet_read_symbols(sheet, keycol=0, keyrow=0):
     data = []
     p = re.compile(r'[A-Z0-9]+\.[A-Z]')
-    for s in sheet_read_column(sheet, keyrow, keycol):
+    for s in sheet_read_column(sheet, keycol, keyrow):
         if p.match(s):
             data.append(s)
     return data
 
-def sheet_read_column(sheet, keyrow=0, keycol=0):
+def sheet_read_column(sheet, keycol=0, keyrow=0):
     data = []
     row = keyrow
     while True:
@@ -156,7 +72,7 @@ def sheet_read_column(sheet, keyrow=0, keycol=0):
         row += 1
     return data
 
-def sheet_clear_columns(sheet, keyrow=0, keycol=0, datacols=[], flags=5):
+def sheet_clear_columns(sheet, keycol=0, keyrow=0, datacols=[], flags=5):
     """
     http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
     """
@@ -172,7 +88,7 @@ def sheet_clear_columns(sheet, keyrow=0, keycol=0, datacols=[], flags=5):
             cell.clearContents(flags)
         row += 1
 
-def sheet_write_columns(sheet, keyrow=0, keycol=0, datacols=[], datadict={}):
+def sheet_write_columns(sheet, keycol=0, keyrow=0, datacols=[], datadict={}):
     formats = datadict['%format']
     row = keyrow
     while True:
@@ -259,6 +175,93 @@ def messageBoxLO4(parentWin, MsgText, MsgTitle, msgButtons):
     msgbox.setCaptionText(MsgTitle)
     msgRet = msgbox.execute()
     return msgRet
+
+###########################################################################
+# general utilities
+###########################################################################
+import socket
+try:
+    import urllib.request
+except:
+    import urllib
+
+webTimeOut = 10
+
+def getHtml(myUrl):
+    global webTimeOut
+    
+    try:
+        if int(webTimeOut) < 1:
+            webTimeOut = 1
+        else:
+            webTimeOut = int(webTimeOut)
+    except:
+        webTimeOut = 1
+
+    socket.setdefaulttimeout(webTimeOut)    # set default timeout for web query
+
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+        'Accept-Encoding': 'none',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive'
+    }
+    
+    attempts = 1
+    html = 'No Response'
+        
+    while True:
+        try:
+            if sys.version[0] == '3':
+                req = urllib.request.Request(url=myUrl, headers=hdr)
+                response = urllib.request.urlopen(req)
+            else:
+                #data = urllib.urlencode(values)
+                req = urllib2.Request(myUrl, None, hdr)
+                response = urllib2.urlopen(req)
+            html = response.read()
+            html = html.decode('1252', 'ignore')
+        except Exception as e:
+            attempts += 1
+            webTimeOut *= 2
+            socket.setdefaulttimeout(webTimeOut)
+            if attempts > 5:
+                break
+        break
+
+    return html
+
+def createPriceDict(html):   
+    priceDict = {}
+    matchObj = re.search( r'.*?\[(.*?)\].*', html)
+    data = ''
+    if matchObj:
+        data = matchObj.group(1)
+
+    priceDict['%format'] = ['%f', '%s']
+        
+    while data:
+        matchObj = re.search( r'.*?{(.*?)\}(.*)', data)
+        if matchObj:
+            symbolData = matchObj.group(1)
+            symbol = ''
+            price = ''
+            currency = ''
+            for symbolElement in symbolData.split(','):
+                symbolElement = symbolElement.replace('"','')
+                if 'symbol' in symbolElement:
+                    symbol = (symbolElement[symbolElement.index(':')+1:])
+                elif 'regularMarketPrice' in symbolElement:
+                    price = (symbolElement[symbolElement.index(':')+1:])
+                elif 'currency' in symbolElement:
+                    currency = (symbolElement[symbolElement.index(':')+1:])
+ 
+            priceDict[symbol] = [price, currency]
+            data = matchObj.group(2)
+
+    return(priceDict)
 
 ###########################################################################
 g_exportedScripts = test_macro, get_yahoo_prices,

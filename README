@@ -6,4 +6,4 @@ unzip test.ods -d t
  <manifest:file-entry manifest:full-path="Scripts/python/" manifest:media-type="application/binary"/>
  <manifest:file-entry manifest:full-path="Scripts/" manifest:media-type="application/binary"/>
 
-mkdir -p t/Scripts/python; \cp LoadPrices.py t/Scripts/python; rm -f test.ods; (cd t; rpurge; zip -r ../test.ods .) && ls -lt test*
+mkdir -p t/Scripts/python; \cp LoadPrices.py t/Scripts/python; rm -f test.ods; (cd t; rpurge; zip -r ../test.ods .) && ls -lt test.ods
