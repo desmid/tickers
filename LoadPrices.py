@@ -32,17 +32,16 @@ def get_yahoo_prices(*args):
 ###########################################################################
 def get_yahoo_prices_body(doc, sheetname='Sheet1', keys='A2:A200',
                           datacols=['B']):
+    sheet = doc.getSheets().getByName(sheetname)
+
     keyrange = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
+    symbols = sheet_read_symbols(sheet, keyrange)
 
-    sheets = doc.getSheets()
-    mySheet = sheets.getByName(sheetname)
-
-    symbols = sheet_read_symbols(mySheet, keyrange)
-    sheet_clear_columns(mySheet, keyrange, datacols)
+    sheet_clear_columns(sheet, keyrange, datacols)
     text = get_html(make_yahoo_url(symbols))
     prices = parse_yahoo_json(text)
-    sheet_write_columns(mySheet, keyrange, datacols, prices)
+    sheet_write_columns(sheet, keyrange, datacols, prices)
 
 def make_yahoo_url(symbols):
     URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
