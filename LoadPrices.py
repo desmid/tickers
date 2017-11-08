@@ -242,20 +242,14 @@ try:
 except:
     import urllib
 
-webTimeOut = 10
+WEB_TIMEOUT  = 10  #seconds
+WEB_MAXTRIES = 5
 
-def get_html(url):
-    global webTimeOut
-    
-    try:
-        if int(webTimeOut) < 1:
-            webTimeOut = 1
-        else:
-            webTimeOut = int(webTimeOut)
-    except:
-        webTimeOut = 1
+def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
+    if timeout < 1: timeout = 1
+    if maxtries < 1: maxtries = 1
 
-    socket.setdefaulttimeout(webTimeOut)    # set default timeout for web query
+    socket.setdefaulttimeout(timeout)  #set default timeout for web query
 
     hdr = {
         'User-Agent': 'Mozilla/5.0 AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -265,11 +259,11 @@ def get_html(url):
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'
     }
-    
-    attempts = 1
+    tries = 0
     html = 'No Response'
         
     while True:
+        if tries > maxtries: break
         try:
             if sys.version[0] == '3':
                 req = urllib.request.Request(url=url, headers=hdr)
@@ -281,11 +275,9 @@ def get_html(url):
             html = response.read()
             html = html.decode('1252', 'ignore')
         except Exception as e:
-            attempts += 1
-            webTimeOut *= 2
-            socket.setdefaulttimeout(webTimeOut)
-            if attempts > 5:
-                break
+            tries += 1
+            timeout *= 2
+            socket.setdefaulttimeout(timeout)
         break
 
     return html
