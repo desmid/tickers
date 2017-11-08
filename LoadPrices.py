@@ -17,6 +17,10 @@ import re
 # logger.debug("Start")
 
 ###########################################################################
+YAHOO_PRICE = 1
+YAHOO_FX    = 2
+
+###########################################################################
 # macros
 ###########################################################################
 def test_macro(XSCRIPTCONTEXT):
@@ -37,31 +41,48 @@ def test_macro(XSCRIPTCONTEXT):
 
 def get_yahoo_prices(*args):
     doc = XSCRIPTCONTEXT.getDocument()
-    get_yahoo_prices_body(doc, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    yahoo_get(YAHOO_PRICE, doc, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
+
+def get_yahoo_fx(*args):
+    doc = XSCRIPTCONTEXT.getDocument()
+    yahoo_get(YAHOO_FX, doc, 'Sheet1', keys='G2:G200', datacols=['H'])
+    yahoo_get(YAHOO_FX, doc, 'Sheet1', keys='J2:J200', datacols=['I'])
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 ###########################################################################
 # macro guts
 ###########################################################################
-def get_yahoo_prices_body(doc, sheetname='Sheet1', keys='A2:A200',
-                          datacols=['B']):
+def yahoo_get(mode, doc, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
+
+    if mode not in (YAHOO_PRICE, YAHOO_FX):
+        raise KeyError("yahoo_get: unknown mode '{}'".format(mode))
+
     sheet = doc.getSheets().getByName(sheetname)
 
     keyrange = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
-    symbols = sheet_read_symbols(sheet, keyrange)
+
+    symbols = sheet_read_symbols(sheet, keyrange, mode)
 
     sheet_clear_columns(sheet, keyrange, datacols)
-    text = get_html(make_yahoo_url(symbols))
-    prices = parse_yahoo_json(text)
-    sheet_write_columns(sheet, keyrange, datacols, prices)
+    url = yahoo_url(symbols, mode)
+    text = get_html(url)
+    values = yahoo_parse_json(text)
+    sheet_write_columns(sheet, keyrange, datacols, values)
 
-def make_yahoo_url(symbols):
+def yahoo_url(symbols, mode):
     URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
-    return URL + 'symbols=' + ','.join(symbols)
+    if mode == YAHOO_PRICE:
+        return URL + 'symbols=' + ','.join(symbols)
+    if mode == YAHOO_FX:
+        #each symbol EURUSD or EUR:USD converted to EURUSD=X
+        sym = [''.join(i.split(':'))+'=X' for i in symbols]
+        return URL + 'symbols=' + ','.join(sym)
+    return ''
 
 #rewrite of LemonFool:SimpleYahooPriceScrape.py:createPriceDict
-def parse_yahoo_json(text):
+def yahoo_parse_json(text):
     m = re.search(r'.*?\[(.*?)\].*', text)
     if not m: return {}
     text = m.group(1)
@@ -84,7 +105,7 @@ def parse_yahoo_json(text):
                 continue
 
             if 'symbol' == key:
-                symbol = val
+                symbol = val.replace('=X', '')
                 continue
 
             if 'regularMarketPrice' == key:
@@ -94,6 +115,8 @@ def parse_yahoo_json(text):
             if 'currency' == key:
                 currency = val.replace('GBp', 'GBX')
                 continue
+
+        #logger.debug("ypj: %s,%s,%s", symbol,price,currency)
 
         data[symbol] = [price, currency]
         text = m.group(2)
@@ -138,8 +161,13 @@ def range2posn(n=''):
     return (name2posn(c), name2posn(r))
 
 ###########################################################################
-def sheet_read_symbols(sheet, posn):
-    p = re.compile(r'[A-Z0-9]+\.[A-Z]')
+def sheet_read_symbols(sheet, posn, mode):
+    if mode == YAHOO_PRICE:
+        p = re.compile(r'[A-Z0-9]+\.[A-Z]')
+    elif mode == YAHOO_FX:
+        p = re.compile(r'[A-Za-z:]')
+    else:
+        p = re.compile(r'^$')
     return [s for s in sheet_read_column(sheet, posn) if p.match(s)]
 
 def sheet_read_column(sheet, posn):
@@ -164,6 +192,7 @@ def sheet_clear_columns(sheet, keyrange, datacols, flags=5):
         row += 1
 
 def sheet_write_columns(sheet, keyrange, datacols, datadict):
+    if len(datadict) < 1: return
     formats = datadict['%formats']
     ((keycol,rowfirst), (_, rowlast)) = keyrange
     for row in range(rowfirst, rowlast+1):
@@ -295,5 +324,5 @@ def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
     return html
 
 ###########################################################################
-g_exportedScripts = test_macro, get_yahoo_prices,
+g_exportedScripts = test_macro, get_yahoo_prices, get_yahoo_fx,
 ###########################################################################
