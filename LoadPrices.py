@@ -76,8 +76,8 @@ def yahoo_url(symbols, mode):
     if mode == YAHOO_PRICE:
         return URL + 'symbols=' + ','.join(symbols)
     if mode == YAHOO_FX:
-        #each symbol EURUSD or EUR:USD converted to EURUSD=X
-        sym = [''.join(i.split(':'))+'=X' for i in symbols]
+        #convert each symbol EURUSD to EURUSD=X
+        sym = [s+'=X' for s in symbols]
         return URL + 'symbols=' + ','.join(sym)
     return ''
 
@@ -165,7 +165,7 @@ def sheet_read_symbols(sheet, posn, mode):
     if mode == YAHOO_PRICE:
         p = re.compile(r'[A-Z0-9]+\.[A-Z]')
     elif mode == YAHOO_FX:
-        p = re.compile(r'[A-Za-z:]')
+        p = re.compile(r'[A-Za-z]')
     else:
         p = re.compile(r'^$')
     return [s for s in sheet_read_column(sheet, posn) if p.match(s)]
