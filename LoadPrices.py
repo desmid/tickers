@@ -3,6 +3,19 @@ import sys
 import os
 import re
 
+# import logging
+
+# LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
+
+# lh = logging.FileHandler(LOGFILE)
+# fm = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
+# lh.setFormatter(fm)
+# lh.setLevel(logging.DEBUG)
+
+# logger = logging.getLogger('LoadPrices')
+# logger.addHandler(lh)
+# logger.debug("Start")
+
 ###########################################################################
 # macros
 ###########################################################################
