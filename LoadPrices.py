@@ -64,11 +64,12 @@ def yahoo_get(mode, doc, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
     datacols = [name2posn(i)[0] for i in datacols]
 
     symbols = sheet_read_symbols(sheet, keyrange, mode)
-
     sheet_clear_columns(sheet, keyrange, datacols)
+
     url = yahoo_url(symbols, mode)
     text = get_html(url)
     values = yahoo_parse_json(text)
+
     sheet_write_columns(sheet, keyrange, datacols, values)
 
 def yahoo_url(symbols, mode):
@@ -127,6 +128,31 @@ def yahoo_parse_json(text):
 # spreadsheet utilities
 ###########################################################################
 def name2posn(n=''):
+    """Return spreadsheet cell names ('A1', AZ2', etc.) as a tuple of
+    0-based positions.
+
+    - Ignores $ signs.
+    - Harmlessly allows row 0 (treats as row 1).
+
+    Example usage and return values:
+
+    name2posn('')    =>  (0,0)
+    name2posn('0')   =>  (0,0)
+    name2posn('A')   =>  (0,0)
+    name2posn('A0')  =>  (0,0)
+    name2posn('A1')  =>  (0,0)
+
+    name2posn('B')   =>  (1,0)
+    name2posn('B0')  =>  (1,0)
+    name2posn('B1')  =>  (1,0)
+    name2posn('B2')  =>  (1,1)
+    name2posn('Z')   =>  (25,0)
+    name2posn('AA')  =>  (26,0)
+    name2posn('AZ')  =>  (51,0)
+    name2posn('BA')  =>  (52,0)
+    name2posn('ZZ')  =>  (701,0)
+    name2posn('AAA') =>  (702,0)
+    """
     if isinstance(n, int):
         if n < 0: n = 0
         return (n,n)
@@ -149,6 +175,20 @@ def name2posn(n=''):
     return (c,r)
 
 def range2posn(n=''):
+    """Return spreadsheet cell name ranges ('A1:A10', B10:G100', etc.) as a
+    tuple of pairs of 0-based positions.
+
+    - Ignores $ signs.
+    - Harmlessly allows row 0 (treats as row 1).
+
+    Example usage and return values:
+
+    range2posn()          =>  ((0,0), (0,0))
+    range2posn('')        =>  ((0,0), (0,0))
+    range2posn('A:Z')     =>  ((0,0), (25,0))
+    range2posn('A1:A99')  =>  ((0,0), (0,98))
+    range2posn('A1:C3')   =>  ((0,0), (2,2))
+    """
     if isinstance(n, int): return (name2posn(n), name2posn(n))
     if not isinstance(n, str): return (name2posn(n), name2posn(n))
     try:
