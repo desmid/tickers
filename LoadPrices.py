@@ -1,14 +1,11 @@
 ###########################################################################
-# some code thanks to LemonFool software people and SimpleYahooPriceScrape
-###########################################################################
-
-###########################################################################
-# macros
-###########################################################################
 import sys
 import os
 import re
 
+###########################################################################
+# macros
+###########################################################################
 def test_macro(XSCRIPTCONTEXT):
     doc = XSCRIPTCONTEXT.getDocument()
     sheets = doc.getSheets()
@@ -26,47 +23,42 @@ def test_macro(XSCRIPTCONTEXT):
     return None
 
 def get_yahoo_prices(*args):
-    get_yahoo_prices_body(XSCRIPTCONTEXT,
-                          'Sheet1', keys='A2:A200', datacols=['B', 'C'])
-    return None
+    doc = XSCRIPTCONTEXT.getDocument()
+    get_yahoo_prices_body(doc, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 ###########################################################################
 # macro guts
 ###########################################################################
-def get_yahoo_prices_body(XSCRIPTCONTEXT,
-                          sheetname='Sheet1', keys='A2:A200', datacols=['B']):
+def get_yahoo_prices_body(doc, sheetname='Sheet1', keys='A2:A200',
+                          datacols=['B']):
     keyrange = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
 
-    doc = XSCRIPTCONTEXT.getDocument()
-
     sheets = doc.getSheets()
     mySheet = sheets.getByName(sheetname)
-    priceDict = {}
 
     symbols = sheet_read_symbols(mySheet, keyrange)
     sheet_clear_columns(mySheet, keyrange, datacols)
-
-    html = get_html(make_yahoo_url(symbols))
-    priceDict = parse_yahoo(html)
-    sheet_write_columns(mySheet, keyrange, datacols, priceDict)
-
-    messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
+    text = get_html(make_yahoo_url(symbols))
+    prices = parse_yahoo_json(text)
+    sheet_write_columns(mySheet, keyrange, datacols, prices)
 
 def make_yahoo_url(symbols):
     URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
     return URL + 'symbols=' + ','.join(symbols)
 
-def parse_yahoo(html):
-    m = re.search(r'.*?\[(.*?)\].*', html)
+#rewrite of LemonFool:SimpleYahooPriceScrape.py:createPriceDict
+def parse_yahoo_json(text):
+    m = re.search(r'.*?\[(.*?)\].*', text)
     if not m: return {}
-    data = m.group(1)
+    text = m.group(1)
 
-    #priceDict[ticker] = [regularMarketPrice, currency]
-    priceDict = { '%formats' : ['%f', '%s'] }
+    #data[ticker] = [regularMarketPrice, currency]
+    data = { '%formats' : ['%f', '%s'] }
 
-    while data:
-        m = re.search(r'.*?{(.*?)\}(.*)', data)
+    while text:
+        m = re.search(r'.*?{(.*?)\}(.*)', text)
         if not m: break
 
         symbolData = m.group(1)
@@ -91,10 +83,10 @@ def parse_yahoo(html):
                 currency = val.replace('GBp', 'GBX')
                 continue
 
-        priceDict[symbol] = [price, currency]
-        data = m.group(2)
+        data[symbol] = [price, currency]
+        text = m.group(2)
 
-    return(priceDict)
+    return data
 
 ###########################################################################
 # spreadsheet utilities
@@ -133,6 +125,7 @@ def range2posn(n=''):
     if r == '': r = '0'
     return (name2posn(c), name2posn(r))
 
+###########################################################################
 def sheet_read_symbols(sheet, posn):
     p = re.compile(r'[A-Z0-9]+\.[A-Z]')
     return [s for s in sheet_read_column(sheet, posn) if p.match(s)]
@@ -187,25 +180,20 @@ def sheet_write_columns(sheet, keyrange, datacols, datadict):
 
 ###########################################################################
 # spreadsheet controls
+# adapted from LemonFool:SimpleYahooPriceScrape.py
 ###########################################################################
+from com.sun.star.awt.VclWindowPeerAttribute import OK, OK_CANCEL, YES_NO, \
+    YES_NO_CANCEL, RETRY_CANCEL, DEF_OK, DEF_CANCEL, DEF_RETRY, DEF_YES, DEF_NO
+
+# Our arbitrary mappings, for use by the caller:
+#     OK = 1
+#    YES = 2
+#     NO = 3
+# CANCEL = 4
 
 # Message box test for OO or LO version
 # Uses either messageBoxOO4 or messageBoxLO4. Pretty much pot luck which one
 # works, depending on which version of OpenOffice or LibreOffice is used
-
-from com.sun.star.awt.VclWindowPeerAttribute import OK, OK_CANCEL, YES_NO, \
-    YES_NO_CANCEL, RETRY_CANCEL, DEF_OK, DEF_CANCEL, DEF_RETRY, DEF_YES, DEF_NO
-
-#            OK: 4194304
-#     OK_CANCEL: 8388608
-#        YES_NO: 16777216
-# YES_NO_CANCEL: 33554432
-#
-# return OK = 1
-#       YES = 2
-#        NO = 3
-#    CANCEL = 0
-
 def messageBox(XSCRIPTCONTEXT, msgText, msgTitle, msgButtons = OK):
     doc = XSCRIPTCONTEXT.getDocument()
     parentWin = doc.CurrentController.Frame.ContainerWindow
@@ -216,27 +204,27 @@ def messageBox(XSCRIPTCONTEXT, msgText, msgTitle, msgButtons = OK):
         msgRet = messageBoxOO4(parentWin, ctx, msgText, msgTitle, msgButtons)
     return msgRet
 
-### following works with OO4 and LO5 but not LO4 or OO Portable 3.2
+# Following works with OO4 and LO5 but not LO4 or OO Portable 3.2
 # Needs numeric msgButtons 1,2,3 etc so translated by buttonDict
 def messageBoxOO4(parentWin, ctx, MsgText, MsgTitle, msgButtons):
-    buttonDict = {OK: 1, OK_CANCEL: 2, YES_NO: 3, YES_NO_CANCEL: 0}
+    buttonDict = {OK: 1, OK_CANCEL: 2, YES_NO: 3, YES_NO_CANCEL: 4}
     msgButtons = buttonDict[msgButtons]
     toolkit = ctx.getServiceManager().createInstanceWithContext("com.sun.star.awt.Toolkit", ctx)
     msgbox = toolkit.createMessageBox(parentWin, 0, msgButtons, MsgTitle, MsgText)
     msgRet =  msgbox.execute()
     return msgRet
 
-# Show a message box with the UNO based toolkit. Works with LO4 and OOP3.2
-# But.... does not work with LO 4.2.3.3
-# msgButtons needs to be in format YES_NO_CANCEL or 33554432
+# Show a message box with the UNO based toolkit.
+# Works with LO4 and OOP3.2
+# Does NOT work with LO 4.2.3.3
 def messageBoxLO4(parentWin, MsgText, MsgTitle, msgButtons):
     #describe window properties.
     aDescriptor = WindowDescriptor()
-    aDescriptor.Type = 1                    # MODALTOP
+    aDescriptor.Type = 1                       #MODALTOP
     aDescriptor.WindowServiceName = "messbox"
     aDescriptor.ParentIndex = -1
     aDescriptor.Parent = parentWin
-    aDescriptor.WindowAttributes = msgButtons   #MsgButton = OK
+    aDescriptor.WindowAttributes = msgButtons
     tk = parentWin.getToolkit()
     msgbox = tk.createWindow(aDescriptor)
     msgbox.setMessageText(MsgText)
@@ -246,6 +234,7 @@ def messageBoxLO4(parentWin, MsgText, MsgTitle, msgButtons):
 
 ###########################################################################
 # general utilities
+# adapted from LemonFool:SimpleYahooPriceScrape.py
 ###########################################################################
 import socket
 try:
