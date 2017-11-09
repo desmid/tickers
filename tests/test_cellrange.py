@@ -96,14 +96,14 @@ class test_cellrange(unittest.TestCase):
         self.assertEqual(c.end_col, 1)
         self.assertEqual(c.end_row, 1)
 
-    def test_named(self):
+    def test_named_A1(self):
         c = cellrange('A1')
         self.assertEqual(c.start_col, 0)
         self.assertEqual(c.start_row, 0)
         self.assertEqual(c.end_col, 0)
         self.assertEqual(c.end_row, 0)
 
-    def test_named(self):
+    def test_named_Z100(self):
         c = cellrange('Z100')
         self.assertEqual(c.start_col, 25)
         self.assertEqual(c.start_row, 99)
