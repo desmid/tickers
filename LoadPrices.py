@@ -23,22 +23,6 @@ YAHOO_FX    = 2
 ###########################################################################
 # macros
 ###########################################################################
-def test_macro(XSCRIPTCONTEXT):
-    doc = XSCRIPTCONTEXT.getDocument()
-    sheets = doc.getSheets()
-    sheet = sheets.getByName("Sheet1")
-    tRange = sheet.getCellRangeByName("C4")
-    tRange.String = "The Python version is %s.%s.%s" % sys.version_info[:3]
-    tRange = sheet.getCellRangeByName("C5")
-    tRange.String = sys.executable
-    tRange = sheet.getCellRangeByName("C6")
-    tRange.String = str(sys.path)
-    tRange = sheet.getCellRangeByName("C7")
-    tRange.String = str(__file__)
-    tRange = sheet.getCellRangeByName("C8")
-    tRange.String = str(os.path.dirname(os.path.realpath(__file__)))
-    return None
-
 def get_yahoo_prices(*args):
     doc = XSCRIPTCONTEXT.getDocument()
     yahoo_get(YAHOO_PRICE, doc, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
@@ -367,5 +351,5 @@ def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
     return html
 
 ###########################################################################
-g_exportedScripts = test_macro, get_yahoo_prices, get_yahoo_fx,
+g_exportedScripts = get_yahoo_prices, get_yahoo_fx,
 ###########################################################################
