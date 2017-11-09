@@ -17,15 +17,14 @@ import re
 # logger.debug("Start")
 
 ###########################################################################
-YAHOO_PRICE = 1
-YAHOO_FX    = 2
-
-###########################################################################
 DOC = XSCRIPTCONTEXT.getDocument()
 
 ###########################################################################
 # macros
 ###########################################################################
+YAHOO_PRICE = 1
+YAHOO_FX    = 2
+
 def get_yahoo_prices(*args):
     yahoo_get(YAHOO_PRICE, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
     messageBox("Processing finished", "Status")
@@ -313,10 +312,11 @@ WEB_TIMEOUT  = 10  #seconds
 WEB_MAXTRIES = 5
 
 def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
-    if timeout < 1: timeout = 1
-    if maxtries < 1: maxtries = 1
 
-    socket.setdefaulttimeout(timeout)  #set default timeout for web query
+    if not isinstance(timeout, int): timeout = 1
+    if timeout < 1: timeout = 1
+    if not isinstance(maxtries, int): maxtries = 1
+    if maxtries < 1: maxtries = 1
 
     hdr = {
         'User-Agent': 'Mozilla/5.0 AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -326,11 +326,12 @@ def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'
     }
-    tries = 0
     html = 'No Response'
-        
+
+    tries = 1
     while True:
         if tries > maxtries: break
+        socket.setdefaulttimeout(timeout)
         try:
             if sys.version[0] == '3':
                 req = urllib.request.Request(url=url, headers=hdr)
@@ -341,11 +342,10 @@ def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
                 response = urllib2.urlopen(req)
             html = response.read()
             html = html.decode('1252', 'ignore')
+            break
         except Exception as e:
             tries += 1
             timeout *= 2
-            socket.setdefaulttimeout(timeout)
-        break
 
     return html
 
