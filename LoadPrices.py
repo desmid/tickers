@@ -3,24 +3,31 @@ import sys
 import os
 import re
 
-# import logging
+###########################################################################
+# https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
 
-# LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
+import logging
 
-# lh = logging.FileHandler(LOGFILE)
-# fm = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
-# lh.setFormatter(fm)
-# lh.setLevel(logging.DEBUG)
+LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
 
-# logger = logging.getLogger('LoadPrices')
-# logger.addHandler(lh)
-# logger.debug("Start")
+logger = logging.getLogger('HypTopUp')
+logger.setLevel(logging.DEBUG)
+lh = logging.FileHandler(LOGFILE)
+fm = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
+lh.setFormatter(fm)
+lh.setLevel(logging.DEBUG)
+logger.addHandler(lh)
+del fm, lh
 
+logger.debug("Start")
+
+###########################################################################
+# LibreOffice/OpenOffice globals
 ###########################################################################
 DOC = XSCRIPTCONTEXT.getDocument()
 
 ###########################################################################
-# macros
+# the macros
 ###########################################################################
 YAHOO_PRICE = 1
 YAHOO_FX    = 2
@@ -103,7 +110,7 @@ def yahoo_parse_json(text):
                 currency = val.replace('GBp', 'GBX')
                 continue
 
-        #logger.debug("ypj: %s,%s,%s", symbol,price,currency)
+        logger.debug("ypj: %s,%s,%s", symbol,price,currency)
 
         data[symbol] = [price, currency]
         text = m.group(2)
