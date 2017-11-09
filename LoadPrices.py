@@ -66,20 +66,23 @@ def yahoo_get(mode, doc, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
     symbols = sheet_read_symbols(sheet, keyrange, mode)
     sheet_clear_columns(sheet, keyrange, datacols)
 
-    url = yahoo_url(symbols, mode)
+    url = yahoo_build_url(symbols, mode)
     text = get_html(url)
     values = yahoo_parse_json(text)
 
     sheet_write_columns(sheet, keyrange, datacols, values)
 
-def yahoo_url(symbols, mode):
+def yahoo_build_url(symbols, mode):
     URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+
     if mode == YAHOO_PRICE:
         return URL + 'symbols=' + ','.join(symbols)
+
     if mode == YAHOO_FX:
         #convert each symbol EURUSD to EURUSD=X
         sym = [s+'=X' for s in symbols]
         return URL + 'symbols=' + ','.join(sym)
+
     return ''
 
 #rewrite of LemonFool:SimpleYahooPriceScrape.py:createPriceDict
