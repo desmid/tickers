@@ -72,9 +72,7 @@ def name2posn(n=''):
         if v < ordA:
             r = int(n)
             break
-        #print(n, v, c, r)
         c = 26*c + v-ordA+1
-        #print(n, v, c, r)
         n = n[1:]
     if c > 0: c -= 1
     if r > 0: r -= 1

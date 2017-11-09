@@ -3,14 +3,12 @@ import unittest
 from cellrange import cellrange, name2posn, range2posn
 
 class test_name2posn(unittest.TestCase):
-    def test_name2posn_with_notintstr(self):
+    def test_name2posn_with_empty(self):
         self.assertEqual(name2posn(), (0,0))
         self.assertEqual(name2posn(None), (0,0))
         self.assertEqual(name2posn(False), (0,0))
         self.assertEqual(name2posn(''), (0,0))
-
-    def test_name2posn_with_punctuation(self):
-        self.assertEqual(name2posn(' $	'), (0,0))
+        self.assertEqual(name2posn(' '), (0,0))
 
     def test_name2posn_with_int(self):
         self.assertEqual(name2posn(0), (0,0))
@@ -19,23 +17,27 @@ class test_name2posn(unittest.TestCase):
         self.assertEqual(name2posn(-2), (0,0))
 
     def test_name2posn_dollars(self):
+        self.assertEqual(name2posn(' $	'), (0,0))
         self.assertEqual(name2posn('$0'), (0,0))
         self.assertEqual(name2posn('$A'), (0,0))
         self.assertEqual(name2posn('$A$0'), (0,0))
         self.assertEqual(name2posn('$A$1'), (0,0))
 
-    def test_name2posn_A1(self):
+    def test_name2posn_A1_forgiving(self):
         self.assertEqual(name2posn('0'), (0,0))
-        self.assertEqual(name2posn('A'), (0,0))
+        self.assertEqual(name2posn('00'), (0,0))
         self.assertEqual(name2posn('A0'), (0,0))
+        self.assertEqual(name2posn('01'), (0,0))
+        self.assertEqual(name2posn('02'), (0,1))
+
+    def test_name2posn_A(self):
+        self.assertEqual(name2posn('A'), (0,0))
         self.assertEqual(name2posn('A1'), (0,0))
+        self.assertEqual(name2posn('A2'), (0,1))
 
-    def test_name2posn_B1(self):
+    def test_name2posn_B(self):
         self.assertEqual(name2posn('B'), (1,0))
-        self.assertEqual(name2posn('B0'), (1,0))
         self.assertEqual(name2posn('B1'), (1,0))
-
-    def test_name2posn_B2(self):
         self.assertEqual(name2posn('B2'), (1,1))
 
     #boundaries 1 to 2 chars
