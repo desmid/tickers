@@ -21,28 +21,28 @@ YAHOO_PRICE = 1
 YAHOO_FX    = 2
 
 ###########################################################################
+DOC = XSCRIPTCONTEXT.getDocument()
+
+###########################################################################
 # macros
 ###########################################################################
 def get_yahoo_prices(*args):
-    doc = XSCRIPTCONTEXT.getDocument()
-    yahoo_get(YAHOO_PRICE, doc, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
-    messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
+    yahoo_get(YAHOO_PRICE, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    messageBox("Processing finished", "Status")
 
 def get_yahoo_fx(*args):
-    doc = XSCRIPTCONTEXT.getDocument()
-    yahoo_get(YAHOO_FX, doc, 'Sheet1', keys='G2:G200', datacols=['H'])
-    yahoo_get(YAHOO_FX, doc, 'Sheet1', keys='J2:J200', datacols=['I'])
-    messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
+    yahoo_get(YAHOO_FX, 'Sheet1', keys='G2:G200', datacols=['H'])
+    yahoo_get(YAHOO_FX, 'Sheet1', keys='J2:J200', datacols=['I'])
+    messageBox("Processing finished", "Status")
 
 ###########################################################################
 # macro guts
 ###########################################################################
-def yahoo_get(mode, doc, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
-
+def yahoo_get(mode, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
     if mode not in (YAHOO_PRICE, YAHOO_FX):
         raise KeyError("yahoo_get: unknown mode '{}'".format(mode))
 
-    sheet = doc.getSheets().getByName(sheetname)
+    sheet = DOC.getSheets().getByName(sheetname)
 
     keyrange = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
@@ -262,9 +262,8 @@ from com.sun.star.awt.VclWindowPeerAttribute import OK, OK_CANCEL, YES_NO, \
 # Message box test for OO or LO version
 # Uses either messageBoxOO4 or messageBoxLO4. Pretty much pot luck which one
 # works, depending on which version of OpenOffice or LibreOffice is used
-def messageBox(XSCRIPTCONTEXT, msgText, msgTitle, msgButtons = OK):
-    doc = XSCRIPTCONTEXT.getDocument()
-    parentWin = doc.CurrentController.Frame.ContainerWindow
+def messageBox(msgText, msgTitle, msgButtons = OK):
+    parentWin = DOC.CurrentController.Frame.ContainerWindow
     try:
         msgRet = messageBoxLO4(parentWin, msgText, msgTitle, msgButtons)
     except:
