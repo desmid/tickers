@@ -27,6 +27,20 @@ logger.debug("Start")
 DOC = XSCRIPTCONTEXT.getDocument()
 
 ###########################################################################
+# add embedded pythonpath
+###########################################################################
+import uno
+
+pythonpath = '/Scripts/python/pythonpath'
+pythonpath = uno.fileUrlToSystemPath(DOC.URL) + pythonpath
+if pythonpath not in sys.path: sys.path.append(pythonpath)
+
+logger.debug("New path: " + str(sys.path))
+
+#internal imports go here:
+
+
+###########################################################################
 # the macros
 ###########################################################################
 YAHOO_PRICE = 1
