@@ -2,22 +2,24 @@
 import sys
 import os
 import re
+import uno
 
 ###########################################################################
+# start logging
 # https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
-
+###########################################################################
 import logging
 
 LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
+LOGFORMAT = '%(asctime)s %(name)s %(levelname)s - %(message)s'
+LOGLEVEL = logging.DEBUG
 
-logger = logging.getLogger('HypTopUp')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger('LoadPrices')
+logger.setLevel(LOGLEVEL)
+
 lh = logging.FileHandler(LOGFILE)
-fm = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
-lh.setFormatter(fm)
-lh.setLevel(logging.DEBUG)
+lh.setFormatter(logging.Formatter(LOGFORMAT))
 logger.addHandler(lh)
-del fm, lh
 
 logger.debug("Start")
 
@@ -27,18 +29,16 @@ logger.debug("Start")
 DOC = XSCRIPTCONTEXT.getDocument()
 
 ###########################################################################
-# add embedded pythonpath
+# embedded pythonpath and imports
 ###########################################################################
-import uno
-
 pythonpath = '/Scripts/python/pythonpath'
 pythonpath = uno.fileUrlToSystemPath(DOC.URL) + pythonpath
 if pythonpath not in sys.path: sys.path.append(pythonpath)
 
 logger.debug("New path: " + str(sys.path))
 
-#internal imports go here:
-
+#embedded imports go here:
+#import mymodule
 
 ###########################################################################
 # the macros
