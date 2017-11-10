@@ -2,7 +2,11 @@
 import sys
 import os
 import re
-import uno
+
+###########################################################################
+# LibreOffice/OpenOffice globals
+###########################################################################
+DOC = XSCRIPTCONTEXT.getDocument()
 
 ###########################################################################
 # start logging
@@ -17,23 +21,23 @@ LOGLEVEL = logging.DEBUG
 logger = logging.getLogger('LoadPrices')
 logger.setLevel(LOGLEVEL)
 
-lh = logging.FileHandler(LOGFILE)
-lh.setFormatter(logging.Formatter(LOGFORMAT))
-logger.addHandler(lh)
+handler = logging.FileHandler(LOGFILE)
+handler.setFormatter(logging.Formatter(LOGFORMAT))
+logger.addHandler(handler)
+del handler
 
 logger.debug("Start")
 
 ###########################################################################
-# LibreOffice/OpenOffice globals
-###########################################################################
-DOC = XSCRIPTCONTEXT.getDocument()
-
-###########################################################################
 # embedded pythonpath and imports
 ###########################################################################
-pythonpath = '/Scripts/python/pythonpath'
-pythonpath = uno.fileUrlToSystemPath(DOC.URL) + pythonpath
+import uno
+
+PYTHONPATH = '/Scripts/python/pythonpath'
+
+pythonpath = uno.fileUrlToSystemPath(DOC.URL) + PYTHONPATH
 if pythonpath not in sys.path: sys.path.append(pythonpath)
+del pythonpath
 
 logger.debug("New path: " + str(sys.path))
 
