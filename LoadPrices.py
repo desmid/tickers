@@ -81,7 +81,8 @@ def yahoo_get(mode, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
     sheet_write_columns(sheet, keyrange, datacols, values)
 
 def yahoo_build_url(symbols, mode):
-    URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+    #URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+    URL = 'http://query1.finance.yahoo.com/v7/finance/quote?'
 
     if mode == YAHOO_PRICE:
         return URL + 'symbols=' + ','.join(symbols)
