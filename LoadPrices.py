@@ -18,15 +18,15 @@ LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
 LOGFORMAT = '%(asctime)s %(name)s %(levelname)s - %(message)s'
 LOGLEVEL = logging.DEBUG
 
-logger = logging.getLogger('LoadPrices')
-logger.setLevel(LOGLEVEL)
+Logger = logging.getLogger('LoadPrices')
+Logger.setLevel(LOGLEVEL)
 
 handler = logging.FileHandler(LOGFILE)
 handler.setFormatter(logging.Formatter(LOGFORMAT))
-logger.addHandler(handler)
+Logger.addHandler(handler)
 del handler
 
-logger.debug("Start")
+Logger.debug("Start")
 
 ###########################################################################
 # embedded pythonpath and imports
@@ -39,7 +39,7 @@ pythonpath = uno.fileUrlToSystemPath(DOC.URL) + PYTHONPATH
 if pythonpath not in sys.path: sys.path.append(pythonpath)
 del pythonpath
 
-logger.debug("New path: " + str(sys.path))
+Logger.debug("New path: " + str(sys.path))
 
 #embedded imports go here:
 #import mymodule
@@ -128,7 +128,7 @@ def yahoo_parse_json(text):
                 currency = val.replace('GBp', 'GBX')
                 continue
 
-        logger.debug("ypj: %s,%s,%s", symbol,price,currency)
+        Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
 
         data[symbol] = [price, currency]
         text = m.group(2)
