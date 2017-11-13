@@ -3,15 +3,16 @@ import re
 
 ORD_A = ord('A')
 
-class cell(object):
-    """Represent a spreadsheet cell coordinate. Create with a zero-based
+class Cell(object):
+    """
+    Represent a spreadsheet cell coordinate. Create with a zero-based
     numeric pair (column, row) or a name string, equivalently:
     
-    cell(0,2)  #column 0, row 3
-    cell('A3') #ditto
+    Cell(0,2)  #column 0, row 2
+    Cell('A3') #ditto, but as written on the spreadsheet
 
-    Raises TypeError if any numerical coordinates are <= 0 or if a
-    name does not specify a complete column row.
+    Ignores $ signs. Raises TypeError if any numerical coordinates
+    are <= 0 or if a name does not specify a complete column row.
 
     Methods:
 
@@ -33,10 +34,11 @@ class cell(object):
             return
 
         raise TypeError(
-            "cell() takes 0, 1, 2 arguments ({} given)".format(len(*args))
+            "Cell() takes 0, 1, 2 arguments ({} supplied)".format(len(*args))
         )
 
     def posn(self): return (self.col, self.row)
+
     def name(self): return self._posn2name((self.col, self.row))
 
     def _set_by_posn(self, col=0, row=0):
@@ -51,6 +53,8 @@ class cell(object):
     def _set_by_name(self, name=''):
         if not isinstance(name, str):
             raise TypeError("cell name must be a string")
+        if name.find(':') > -1:
+            raise TypeError("cell name must not be a range")
 
         name = str(name).upper().strip()
         name = re.sub('\$', '', name)
