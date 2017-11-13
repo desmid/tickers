@@ -1,0 +1,15 @@
+#!/bin/sh
+
+TARGET=t
+ODS=test.ods
+
+mkdir -p t/Scripts/python
+
+cp -fpr dev/LoadPrices.py dev/pythonpath $TARGET/Scripts/python
+cp -f dev/manifest.xml $TARGET/META-INF
+
+rm -f $ODS
+
+(cd $TARGET; $HOME/pub/bin/rpurge; zip -r ../$ODS .)
+
+ls -lt $ODS*
