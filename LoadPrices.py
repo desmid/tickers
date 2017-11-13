@@ -13,20 +13,23 @@ DOC = XSCRIPTCONTEXT.getDocument()
 # https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
 ###########################################################################
 import logging
+import platform
 
 LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
-LOGFORMAT = '%(asctime)s %(name)s %(levelname)s - %(message)s'
+LOGFORMAT = '%(asctime)s %(levelname)5s [%(lineno)4s - %(funcName)-15s] %(message)s'
 LOGLEVEL = logging.DEBUG
 
 Logger = logging.getLogger('LoadPrices')
 Logger.setLevel(LOGLEVEL)
 
-handler = logging.FileHandler(LOGFILE)
-handler.setFormatter(logging.Formatter(LOGFORMAT))
-Logger.addHandler(handler)
-del handler
+tmp = logging.FileHandler(LOGFILE)
+tmp.setFormatter(logging.Formatter(LOGFORMAT))
+Logger.addHandler(tmp)
+del tmp
 
 Logger.debug("Start")
+Logger.info(str(platform.uname()))
+Logger.info("Python %s", sys.version)
 
 ###########################################################################
 # embedded pythonpath and imports
@@ -81,8 +84,7 @@ def yahoo_get(mode, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
     sheet_write_columns(sheet, keyrange, datacols, values)
 
 def yahoo_build_url(symbols, mode):
-    #URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
-    URL = 'http://query1.finance.yahoo.com/v7/finance/quote?'
+    URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
 
     if mode == YAHOO_PRICE:
         return URL + 'symbols=' + ','.join(symbols)
