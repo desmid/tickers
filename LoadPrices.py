@@ -4,11 +4,6 @@ import os
 import re
 
 ###########################################################################
-# LibreOffice/OpenOffice globals
-###########################################################################
-DOC = XSCRIPTCONTEXT.getDocument()
-
-###########################################################################
 # start logging
 # https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
 ###########################################################################
@@ -32,6 +27,11 @@ Logger.info(str(platform.uname()))
 Logger.info("Python %s", sys.version)
 
 ###########################################################################
+# LibreOffice/OpenOffice globals
+###########################################################################
+DOC = XSCRIPTCONTEXT.getDocument()
+
+###########################################################################
 # embedded pythonpath and imports
 ###########################################################################
 import uno
@@ -45,262 +45,21 @@ del pythonpath
 Logger.debug("New path: " + str(sys.path))
 
 #embedded imports go here:
-#import mymodule
+from Yahoo import Yahoo
 
 ###########################################################################
 # the macros
 ###########################################################################
 def get_yahoo_prices(*args):
-    Yahoo.get('Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    yahoo = Yahoo(DOC)
+    yahoo.get('Sheet1', keys='A2:A200', datacols=['B', 'C'])
     messageBox("Processing finished", "Status")
 
 def get_yahoo_fx(*args):
-    Yahoo.get('Sheet1', keys='G2:G200', datacols=['H'])
-    Yahoo.get('Sheet1', keys='J2:J200', datacols=['I'])
+    yahoo = Yahoo(DOC)
+    yahoo.get('Sheet1', keys='G2:G200', datacols=['H'])
+    yahoo.get('Sheet1', keys='J2:J200', datacols=['I'])
     messageBox("Processing finished", "Status")
-
-###########################################################################
-# macro guts
-###########################################################################
-class Yahoo(object):
-
-    URL_YAHOO = 'https://query1.finance.yahoo.com/v7/finance/quote?'
-
-    CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
-    CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
-    CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
-    CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
-
-    @classmethod
-    def get(cls, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
-        sheet = DOC.getSheets().getByName(sheetname)
-
-        keyrange = range2posn(keys)
-        datacols = [name2posn(i)[0] for i in datacols]
-
-        keycolumn = sheet_read_column(sheet, keyrange)
-
-        sym2key = cls.yahoo_get_key_symbol_dict(keycolumn)
-
-        Logger.debug(str(sym2key))
-
-        sheet_clear_columns(sheet, keyrange, datacols)
-
-        url = cls.yahoo_build_url_with_symbols(sym2key.keys())
-
-        Logger.debug(url)
-
-        text = get_html(url)
-
-        dataDict = cls.yahoo_parse_json(text)
-
-        Logger.debug(dataDict)
-
-        for s,k in sym2key.items():
-            dataDict[k] = dataDict[s]
-
-        Logger.debug(dataDict)
-
-        sheet_write_columns(sheet, keyrange, datacols, dataDict)
-
-    @classmethod
-    def yahoo_get_key_symbol_dict(cls, keycolumn):
-        d = {}
-        for key in keycolumn:
-            m = cls.CRE_EPIC.search(key)
-            if m:
-                Logger.debug('EPIC: ' + m.group(1))
-                d[m.group(1)] = key
-                continue
-            m = cls.CRE_EPIC_EX.search(key)
-            if m:
-                Logger.debug('EPIC_EX: ' + m.group(1))
-                d[m.group(1)] = key
-                continue
-            m = cls.CRE_INDEX.search(key)
-            if m:
-                Logger.debug('INDEX: ' + m.group(1))
-                d[m.group(1)] = key
-                continue
-            m = cls.CRE_FXPAIR.search(key)
-            if m:
-                Logger.debug('FXPAIR: ' + m.group(1))
-                d[m.group(1) + '=X'] = key
-                continue
-        return d
-
-    @classmethod
-    def yahoo_build_url_with_symbols(cls, symbols):
-        return cls.URL_YAHOO + 'symbols=' + ','.join(symbols)
-
-    @classmethod
-    def yahoo_parse_json(cls, text):
-        m = re.search(r'.*?\[(.*?)\].*', text)
-        if not m: return {}
-        text = m.group(1)
-
-        #data[ticker] = [regularMarketPrice, currency]
-        data = { '%formats' : ['%f', '%s'] }
-
-        while text:
-            m = re.search(r'.*?{(.*?)\}(.*)', text)
-            if not m: break
-
-            symbolData = m.group(1)
-            symbol, price, currency = '', '', ''
-
-            for element in symbolData.split(','):
-                element = element.replace('"','')
-                try:
-                    key,val = element.split(':', 1)
-                except:
-                    continue
-
-                if 'symbol' == key:
-                    symbol = val
-                    continue
-
-
-                if 'regularMarketPrice' == key:
-                    price = val
-                    continue
-
-                if 'currency' == key:
-                    currency = val.replace('GBp', 'GBX')
-                    continue
-
-            Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
-
-            data[symbol] = [price, currency]
-            text = m.group(2)
-
-        return data
-
-###########################################################################
-# spreadsheet utilities
-###########################################################################
-def name2posn(n=''):
-    """Return spreadsheet cell names ('A1', AZ2', etc.) as a tuple of
-    0-based positions.
-
-    - Ignores $ signs.
-    - Harmlessly allows row 0 (treats as row 1).
-
-    Example usage and return values:
-
-    name2posn('')    =>  (0,0)
-    name2posn('0')   =>  (0,0)
-    name2posn('A')   =>  (0,0)
-    name2posn('A0')  =>  (0,0)
-    name2posn('A1')  =>  (0,0)
-
-    name2posn('B')   =>  (1,0)
-    name2posn('B0')  =>  (1,0)
-    name2posn('B1')  =>  (1,0)
-    name2posn('B2')  =>  (1,1)
-    name2posn('Z')   =>  (25,0)
-    name2posn('AA')  =>  (26,0)
-    name2posn('AZ')  =>  (51,0)
-    name2posn('BA')  =>  (52,0)
-    name2posn('ZZ')  =>  (701,0)
-    name2posn('AAA') =>  (702,0)
-    """
-    if isinstance(n, int):
-        if n < 0: n = 0
-        return (n,n)
-    if not isinstance(n, str): return (0,0)
-    n = re.sub('[^A-Z0-9:]', '', str(n).upper())
-    #0-based arithmetic
-    if n is '': n = '1'
-    c,r,ordA = 0,0,ord('A')
-    while len(n) > 0:
-        v = ord(n[0])
-        if v < ordA:
-            r = int(n)
-            break
-        #print(n, v, c, r)
-        c = 26*c + v-ordA+1
-        #print(n, v, c, r)
-        n = n[1:]
-    if c > 0: c -= 1
-    if r > 0: r -= 1
-    return (c,r)
-
-def range2posn(n=''):
-    """Return spreadsheet cell name ranges ('A1:A10', B10:G100', etc.) as a
-    tuple of pairs of 0-based positions.
-
-    - Ignores $ signs.
-    - Harmlessly allows row 0 (treats as row 1).
-
-    Example usage and return values:
-
-    range2posn()          =>  ((0,0), (0,0))
-    range2posn('')        =>  ((0,0), (0,0))
-    range2posn('A:Z')     =>  ((0,0), (25,0))
-    range2posn('A1:A99')  =>  ((0,0), (0,98))
-    range2posn('A1:C3')   =>  ((0,0), (2,2))
-    """
-    if isinstance(n, int): return (name2posn(n), name2posn(n))
-    if not isinstance(n, str): return (name2posn(n), name2posn(n))
-    try:
-        c,r = n.split(':')
-    except:
-        c = n.split(':')[0]
-        r = c
-    if c == '': c = '0'
-    if r == '': r = '0'
-    return (name2posn(c), name2posn(r))
-
-###########################################################################
-def sheet_read_column(sheet, posn):
-    ((keycol,rowfirst), (_, rowlast)) = posn
-    return [
-        sheet.getCellByPosition(keycol, row).getString()
-        for row in range(rowfirst, rowlast+1)
-    ]
-
-def sheet_clear_columns(sheet, keyrange, datacols, flags=5):
-    """
-    http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
-    """
-    ((keycol,rowfirst), (_, rowlast)) = keyrange
-    for row in range(rowfirst, rowlast+1):
-        key = sheet.getCellByPosition(keycol, row).getString()
-        for col in datacols:
-            cell = sheet.getCellByPosition(col, row)
-            item = cell.getString()
-            #print("clear({},{})={}".format(col, row, item))
-            cell.clearContents(flags)
-        row += 1
-
-def sheet_write_columns(sheet, keyrange, datacols, datadict):
-    if len(datadict) < 1: return
-    formats = datadict['%formats']
-    ((keycol,rowfirst), (_, rowlast)) = keyrange
-    for row in range(rowfirst, rowlast+1):
-        key = sheet.getCellByPosition(keycol, row).getString()
-        try:
-            data = datadict[key]
-        except KeyError:
-            row += 1
-            continue
-        for i,col in enumerate(datacols):
-            cell = sheet.getCellByPosition(col, row)
-            if formats[i] == '%f':
-                value = float(data[i])
-                #print("write({},{},{})={}".format(col, row, key, value))
-                cell.Value = value
-            elif formats[i] == '%s':
-                value = str(data[i])
-                #print("write({},{},{})={}".format(col, row, key, value))
-                cell.String = value
-            else:
-                value = str(data[i])
-                #print("write({},{},{})={}".format(col, row, key, value))
-                cell.String = value
-        row += 1
-
 
 ###########################################################################
 # spreadsheet controls

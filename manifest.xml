@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">
+ <manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/>
+ <manifest:file-entry manifest:full-path="Thumbnails/thumbnail.png" manifest:media-type="image/png"/>
+ <manifest:file-entry manifest:full-path="settings.xml" manifest:media-type="text/xml"/>
+ <manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+ <manifest:file-entry manifest:full-path="meta.xml" manifest:media-type="text/xml"/>
+ <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+ <manifest:file-entry manifest:full-path="manifest.rdf" manifest:media-type="application/rdf+xml"/>
+ <manifest:file-entry manifest:full-path="Configurations2/accelerator/current.xml" manifest:media-type=""/>
+ <manifest:file-entry manifest:full-path="Configurations2/" manifest:media-type="application/vnd.sun.xml.ui.configuration"/>
+<!-- Scripts: macros -->
+ <manifest:file-entry manifest:full-path="Scripts/python/LoadPrices.py" manifest:media-type="application/binary"/>
+<!-- Scripts: libs -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/WebAgent.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/SheetAPI.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Yahoo.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Cell.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/__init__.py" manifest:media-type="application/binary"/>
+<!-- Scripts: paths -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/" manifest:media-type="application/binary"/>
+<!-- Scripts end -->
+
+</manifest:manifest>
