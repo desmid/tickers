@@ -5,7 +5,7 @@ Logger.debug("Load: Yahoo")
 
 ###########################################################################
 import re
-import Cell   #replace this
+import CellRange
 import SheetAPI
 import WebAgent
 
@@ -23,11 +23,14 @@ class Yahoo(object):
         self.doc = doc
         self.web = WebAgent.WebAgent()
 
-    def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
+    def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B2']):
         sheet = self.doc.getSheets().getByName(sheetname)
 
-        keyrange = Cell.range2posn(keys)
-        datacols = [Cell.name2posn(i)[0] for i in datacols]
+        keyrange = CellRange.CellRange(keys).posn()
+        datacols = [(CellRange.CellRange(col).posn())[0] for col in datacols]
+
+        Logger.debug('keyrange: ' + str(keyrange))
+        Logger.debug('datacols: ' + str(datacols))
 
         keycolumn = SheetAPI.read_column(sheet, keyrange)
 

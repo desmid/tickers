@@ -99,7 +99,6 @@ class WebAgent(object):
             if self.state['timeout'] < 1:
                 self.state['timeout'] = self.Deft_Timeout
         except Exception as e:
-            Logger.debug(e)
             self.state['timeout'] = self.Deft_Timeout
 
     def fetch(self, url):

@@ -18,7 +18,7 @@ def clear_columns(sheet, keyrange, datacols, flags=5):
     ((keycol,rowfirst), (_, rowlast)) = keyrange
     for row in range(rowfirst, rowlast+1):
         key = sheet.getCellByPosition(keycol, row).getString()
-        for col in datacols:
+        for (_,col) in datacols:
             cell = sheet.getCellByPosition(col, row)
             item = cell.getString()
             #print("clear({},{})={}".format(col, row, item))
@@ -36,7 +36,7 @@ def write_columns(sheet, keyrange, datacols, datadict):
         except KeyError:
             row += 1
             continue
-        for i,col in enumerate(datacols):
+        for i,(col,_) in enumerate(datacols):
             cell = sheet.getCellByPosition(col, row)
             if formats[i] == '%f':
                 value = float(data[i])

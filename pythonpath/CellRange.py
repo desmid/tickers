@@ -1,4 +1,9 @@
 ###########################################################################
+import logging
+Logger = logging.getLogger('LoadPrices')
+Logger.debug("Load: CellRange")
+
+###########################################################################
 import re
 
 from Cell import Cell
