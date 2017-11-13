@@ -50,51 +50,83 @@ Logger.debug("New path: " + str(sys.path))
 ###########################################################################
 # the macros
 ###########################################################################
-YAHOO_PRICE = 1
-YAHOO_FX    = 2
-
 def get_yahoo_prices(*args):
-    yahoo_get(YAHOO_PRICE, 'Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    yahoo_get('Sheet1', keys='A2:A200', datacols=['B', 'C'])
     messageBox("Processing finished", "Status")
 
 def get_yahoo_fx(*args):
-    yahoo_get(YAHOO_FX, 'Sheet1', keys='G2:G200', datacols=['H'])
-    yahoo_get(YAHOO_FX, 'Sheet1', keys='J2:J200', datacols=['I'])
+    yahoo_get('Sheet1', keys='G2:G200', datacols=['H'])
+    yahoo_get('Sheet1', keys='J2:J200', datacols=['I'])
     messageBox("Processing finished", "Status")
 
 ###########################################################################
 # macro guts
 ###########################################################################
-def yahoo_get(mode, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
-    if mode not in (YAHOO_PRICE, YAHOO_FX):
-        raise KeyError("yahoo_get: unknown mode '{}'".format(mode))
+URL_YAHOO = 'https://query1.finance.yahoo.com/v7/finance/quote?'
 
+CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
+CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
+CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
+CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
+
+def yahoo_get(sheetname='Sheet1', keys='A2:A200', datacols=['B']):
     sheet = DOC.getSheets().getByName(sheetname)
 
     keyrange = range2posn(keys)
     datacols = [name2posn(i)[0] for i in datacols]
 
-    symbols = sheet_read_symbols(sheet, keyrange, mode)
+    keycolumn = sheet_read_column(sheet, keyrange)
+
+    sym2key = yahoo_get_key_symbol_dict(keycolumn)
+
+    Logger.debug(str(sym2key))
+
     sheet_clear_columns(sheet, keyrange, datacols)
 
-    url = yahoo_build_url(symbols, mode)
+    url = yahoo_build_url_with_symbols(sym2key.keys())
+
+    Logger.debug(url)
+
     text = get_html(url)
-    values = yahoo_parse_json(text)
 
-    sheet_write_columns(sheet, keyrange, datacols, values)
+    dataDict = yahoo_parse_json(text)
 
-def yahoo_build_url(symbols, mode):
-    URL = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+    Logger.debug(dataDict)
 
-    if mode == YAHOO_PRICE:
-        return URL + 'symbols=' + ','.join(symbols)
+    for s,k in sym2key.items():
+        dataDict[k] = dataDict[s]
 
-    if mode == YAHOO_FX:
-        #convert each symbol EURUSD to EURUSD=X
-        sym = [s+'=X' for s in symbols]
-        return URL + 'symbols=' + ','.join(sym)
+    Logger.debug(dataDict)
 
-    return ''
+    sheet_write_columns(sheet, keyrange, datacols, dataDict)
+
+def yahoo_get_key_symbol_dict(keycolumn):
+    d = {}
+    for key in keycolumn:
+        m = CRE_EPIC.search(key)
+        if m:
+            Logger.debug('EPIC: ' + m.group(1))
+            d[m.group(1)] = key
+            continue
+        m = CRE_EPIC_EX.search(key)
+        if m:
+            Logger.debug('EPIC_EX: ' + m.group(1))
+            d[m.group(1)] = key
+            continue
+        m = CRE_INDEX.search(key)
+        if m:
+            Logger.debug('INDEX: ' + m.group(1))
+            d[m.group(1)] = key
+            continue
+        m = CRE_FXPAIR.search(key)
+        if m:
+            Logger.debug('FXPAIR: ' + m.group(1))
+            d[m.group(1) + '=X'] = key
+            continue
+    return d
+
+def yahoo_build_url_with_symbols(symbols):
+    return URL_YAHOO + 'symbols=' + ','.join(symbols)
 
 #rewrite of LemonFool:SimpleYahooPriceScrape.py:createPriceDict
 def yahoo_parse_json(text):
@@ -120,7 +152,7 @@ def yahoo_parse_json(text):
                 continue
 
             if 'symbol' == key:
-                symbol = val.replace('=X', '')
+                symbol = val
                 continue
 
             if 'regularMarketPrice' == key:
@@ -215,15 +247,6 @@ def range2posn(n=''):
     return (name2posn(c), name2posn(r))
 
 ###########################################################################
-def sheet_read_symbols(sheet, posn, mode):
-    if mode == YAHOO_PRICE:
-        p = re.compile(r'[A-Z0-9]+\.[A-Z]')
-    elif mode == YAHOO_FX:
-        p = re.compile(r'[A-Za-z]')
-    else:
-        p = re.compile(r'^$')
-    return [s for s in sheet_read_column(sheet, posn) if p.match(s)]
-
 def sheet_read_column(sheet, posn):
     ((keycol,rowfirst), (_, rowlast)) = posn
     return [
