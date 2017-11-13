@@ -115,56 +115,5 @@ def messageBoxLO4(parentWin, MsgText, MsgTitle, msgButtons):
     return msgRet
 
 ###########################################################################
-# general utilities
-# adapted from LemonFool:SimpleYahooPriceScrape.py
-###########################################################################
-import socket
-try:
-    import urllib.request
-except:
-    import urllib
-
-WEB_TIMEOUT  = 10  #seconds
-WEB_MAXTRIES = 5
-
-def get_html(url, timeout=WEB_TIMEOUT, maxtries=WEB_MAXTRIES):
-
-    if not isinstance(timeout, int): timeout = 1
-    if timeout < 1: timeout = 1
-    if not isinstance(maxtries, int): maxtries = 1
-    if maxtries < 1: maxtries = 1
-
-    hdr = {
-        'User-Agent': 'Mozilla/5.0 AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-        'Accept-Encoding': 'none',
-        'Accept-Language': 'en-US,en;q=0.8',
-        'Connection': 'keep-alive'
-    }
-    html = 'No Response'
-
-    tries = 1
-    while True:
-        if tries > maxtries: break
-        socket.setdefaulttimeout(timeout)
-        try:
-            if sys.version[0] == '3':
-                req = urllib.request.Request(url=url, headers=hdr)
-                response = urllib.request.urlopen(req)
-            else:
-                #data = urllib.urlencode(values)
-                req = urllib2.Request(url, None, hdr)
-                response = urllib2.urlopen(req)
-            html = response.read()
-            html = html.decode('1252', 'ignore')
-            break
-        except Exception as e:
-            tries += 1
-            timeout *= 2
-
-    return html
-
-###########################################################################
 g_exportedScripts = get_yahoo_prices, get_yahoo_fx,
 ###########################################################################
