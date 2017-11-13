@@ -12,6 +12,7 @@
 <!-- Scripts: macros -->
  <manifest:file-entry manifest:full-path="Scripts/python/LoadPrices.py" manifest:media-type="application/binary"/>
 <!-- Scripts: libs -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LO_Controls.py" manifest:media-type="application/binary"/>
  <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/WebAgent.py" manifest:media-type="application/binary"/>
  <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/SheetAPI.py" manifest:media-type="application/binary"/>
  <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Yahoo.py" manifest:media-type="application/binary"/>
