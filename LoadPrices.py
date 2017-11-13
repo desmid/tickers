@@ -51,124 +51,130 @@ Logger.debug("New path: " + str(sys.path))
 # the macros
 ###########################################################################
 def get_yahoo_prices(*args):
-    yahoo_get('Sheet1', keys='A2:A200', datacols=['B', 'C'])
+    Yahoo.get('Sheet1', keys='A2:A200', datacols=['B', 'C'])
     messageBox("Processing finished", "Status")
 
 def get_yahoo_fx(*args):
-    yahoo_get('Sheet1', keys='G2:G200', datacols=['H'])
-    yahoo_get('Sheet1', keys='J2:J200', datacols=['I'])
+    Yahoo.get('Sheet1', keys='G2:G200', datacols=['H'])
+    Yahoo.get('Sheet1', keys='J2:J200', datacols=['I'])
     messageBox("Processing finished", "Status")
 
 ###########################################################################
 # macro guts
 ###########################################################################
-URL_YAHOO = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+class Yahoo(object):
 
-CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
-CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
-CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
-CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
+    URL_YAHOO = 'https://query1.finance.yahoo.com/v7/finance/quote?'
 
-def yahoo_get(sheetname='Sheet1', keys='A2:A200', datacols=['B']):
-    sheet = DOC.getSheets().getByName(sheetname)
+    CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
+    CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
+    CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
+    CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
 
-    keyrange = range2posn(keys)
-    datacols = [name2posn(i)[0] for i in datacols]
+    @classmethod
+    def get(cls, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
+        sheet = DOC.getSheets().getByName(sheetname)
 
-    keycolumn = sheet_read_column(sheet, keyrange)
+        keyrange = range2posn(keys)
+        datacols = [name2posn(i)[0] for i in datacols]
 
-    sym2key = yahoo_get_key_symbol_dict(keycolumn)
+        keycolumn = sheet_read_column(sheet, keyrange)
 
-    Logger.debug(str(sym2key))
+        sym2key = cls.yahoo_get_key_symbol_dict(keycolumn)
 
-    sheet_clear_columns(sheet, keyrange, datacols)
+        Logger.debug(str(sym2key))
 
-    url = yahoo_build_url_with_symbols(sym2key.keys())
+        sheet_clear_columns(sheet, keyrange, datacols)
 
-    Logger.debug(url)
+        url = cls.yahoo_build_url_with_symbols(sym2key.keys())
 
-    text = get_html(url)
+        Logger.debug(url)
 
-    dataDict = yahoo_parse_json(text)
+        text = get_html(url)
 
-    Logger.debug(dataDict)
+        dataDict = cls.yahoo_parse_json(text)
 
-    for s,k in sym2key.items():
-        dataDict[k] = dataDict[s]
+        Logger.debug(dataDict)
 
-    Logger.debug(dataDict)
+        for s,k in sym2key.items():
+            dataDict[k] = dataDict[s]
 
-    sheet_write_columns(sheet, keyrange, datacols, dataDict)
+        Logger.debug(dataDict)
 
-def yahoo_get_key_symbol_dict(keycolumn):
-    d = {}
-    for key in keycolumn:
-        m = CRE_EPIC.search(key)
-        if m:
-            Logger.debug('EPIC: ' + m.group(1))
-            d[m.group(1)] = key
-            continue
-        m = CRE_EPIC_EX.search(key)
-        if m:
-            Logger.debug('EPIC_EX: ' + m.group(1))
-            d[m.group(1)] = key
-            continue
-        m = CRE_INDEX.search(key)
-        if m:
-            Logger.debug('INDEX: ' + m.group(1))
-            d[m.group(1)] = key
-            continue
-        m = CRE_FXPAIR.search(key)
-        if m:
-            Logger.debug('FXPAIR: ' + m.group(1))
-            d[m.group(1) + '=X'] = key
-            continue
-    return d
+        sheet_write_columns(sheet, keyrange, datacols, dataDict)
 
-def yahoo_build_url_with_symbols(symbols):
-    return URL_YAHOO + 'symbols=' + ','.join(symbols)
-
-#rewrite of LemonFool:SimpleYahooPriceScrape.py:createPriceDict
-def yahoo_parse_json(text):
-    m = re.search(r'.*?\[(.*?)\].*', text)
-    if not m: return {}
-    text = m.group(1)
-
-    #data[ticker] = [regularMarketPrice, currency]
-    data = { '%formats' : ['%f', '%s'] }
-
-    while text:
-        m = re.search(r'.*?{(.*?)\}(.*)', text)
-        if not m: break
-
-        symbolData = m.group(1)
-        symbol, price, currency = '', '', ''
-
-        for element in symbolData.split(','):
-            element = element.replace('"','')
-            try:
-                key,val = element.split(':', 1)
-            except:
+    @classmethod
+    def yahoo_get_key_symbol_dict(cls, keycolumn):
+        d = {}
+        for key in keycolumn:
+            m = cls.CRE_EPIC.search(key)
+            if m:
+                Logger.debug('EPIC: ' + m.group(1))
+                d[m.group(1)] = key
                 continue
-
-            if 'symbol' == key:
-                symbol = val
+            m = cls.CRE_EPIC_EX.search(key)
+            if m:
+                Logger.debug('EPIC_EX: ' + m.group(1))
+                d[m.group(1)] = key
                 continue
-
-            if 'regularMarketPrice' == key:
-                price = val
+            m = cls.CRE_INDEX.search(key)
+            if m:
+                Logger.debug('INDEX: ' + m.group(1))
+                d[m.group(1)] = key
                 continue
-
-            if 'currency' == key:
-                currency = val.replace('GBp', 'GBX')
+            m = cls.CRE_FXPAIR.search(key)
+            if m:
+                Logger.debug('FXPAIR: ' + m.group(1))
+                d[m.group(1) + '=X'] = key
                 continue
+        return d
 
-        Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
+    @classmethod
+    def yahoo_build_url_with_symbols(cls, symbols):
+        return cls.URL_YAHOO + 'symbols=' + ','.join(symbols)
 
-        data[symbol] = [price, currency]
-        text = m.group(2)
+    @classmethod
+    def yahoo_parse_json(cls, text):
+        m = re.search(r'.*?\[(.*?)\].*', text)
+        if not m: return {}
+        text = m.group(1)
 
-    return data
+        #data[ticker] = [regularMarketPrice, currency]
+        data = { '%formats' : ['%f', '%s'] }
+
+        while text:
+            m = re.search(r'.*?{(.*?)\}(.*)', text)
+            if not m: break
+
+            symbolData = m.group(1)
+            symbol, price, currency = '', '', ''
+
+            for element in symbolData.split(','):
+                element = element.replace('"','')
+                try:
+                    key,val = element.split(':', 1)
+                except:
+                    continue
+
+                if 'symbol' == key:
+                    symbol = val
+                    continue
+
+
+                if 'regularMarketPrice' == key:
+                    price = val
+                    continue
+
+                if 'currency' == key:
+                    currency = val.replace('GBp', 'GBX')
+                    continue
+
+            Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
+
+            data[symbol] = [price, currency]
+            text = m.group(2)
+
+        return data
 
 ###########################################################################
 # spreadsheet utilities
