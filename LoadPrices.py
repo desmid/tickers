@@ -53,13 +53,13 @@ from LO_Controls import messageBox
 ###########################################################################
 def get_yahoo_prices(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get('Sheet1', keys='A2:A200', datacols=['B2', 'C2'])
+    yahoo.get('Sheet1', keys='A2:A200', datacols=['B', 'C'])
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 def get_yahoo_fx(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get('Sheet1', keys='G2:G200', datacols=['H2'])
-    yahoo.get('Sheet1', keys='J2:J200', datacols=['I2'])
+    yahoo.get('Sheet1', keys='G2:G200', datacols=['H'])
+    yahoo.get('Sheet1', keys='J2:J200', datacols=['I'])
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 g_exportedScripts = get_yahoo_prices, get_yahoo_fx,

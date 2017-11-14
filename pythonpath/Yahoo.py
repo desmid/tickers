@@ -23,7 +23,7 @@ class Yahoo(object):
         self.doc = doc
         self.web = WebAgent.WebAgent()
 
-    def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B2']):
+    def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
         sheet = self.doc.getSheets().getByName(sheetname)
 
         keyrange = CellRange.CellRange(keys).posn()
