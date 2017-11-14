@@ -69,8 +69,8 @@ class test_Cell_set_name(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             Cell('$0')
-        with self.assertRaises(TypeError):
-            Cell('$A')
+        # with self.assertRaises(TypeError):
+        #     Cell('$A')
         with self.assertRaises(TypeError):
             Cell('$A$0')
 
@@ -86,16 +86,19 @@ class test_Cell_set_name(unittest.TestCase):
             Cell('0' )
         with self.assertRaises(TypeError):
             Cell('00')
-        with self.assertRaises(TypeError):
-            Cell('01')
-        with self.assertRaises(TypeError):
-            Cell('02')
+
+    def test_singleton_columns(self):
         with self.assertRaises(TypeError):
             Cell('A0')
-        with self.assertRaises(TypeError):
-            Cell('A' )
-        with self.assertRaises(TypeError):
-            Cell('B' )
+
+        self.assertEqual(Cell('A').posn(), (0,0))
+        self.assertEqual(Cell('B').posn(), (1,0))
+        self.assertEqual(Cell('AAA1').posn(), (702,0))
+
+    def test_singleton_rows(self):
+        self.assertEqual(Cell('1').posn(), (0,0))
+        self.assertEqual(Cell('01').posn(), (0,0))
+        self.assertEqual(Cell('02').posn(), (0,1))
 
     def test_set_name_A(self):
         self.assertEqual(Cell('A1').posn(), (0,0))

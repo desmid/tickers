@@ -79,6 +79,12 @@ class test_cell_setget_posn(unittest.TestCase):
         with self.assertRaises(TypeError):
             CellRange(1,2,3,-4)
 
+    def test_wrong_posn_orientation_fails(self):
+        with self.assertRaises(TypeError):
+            CellRange(1,0,0,0)  #B1:A1)
+        with self.assertRaises(TypeError):
+            CellRange(0,1,1,0)  #A2:B1
+
     def test_set_posn_zero(self):
         self.assertEqual(CellRange().posn(), ((0,0),(0,0)) )
         self.assertEqual(CellRange(0,0).posn(), ((0,0),(0,0)) )
@@ -105,15 +111,13 @@ class test_cell_set_name(unittest.TestCase):
         with self.assertRaises(TypeError):
             CellRange('00')
         with self.assertRaises(TypeError):
-            CellRange('01')
-        with self.assertRaises(TypeError):
-            CellRange('02')
-        with self.assertRaises(TypeError):
             CellRange('A0')
-        with self.assertRaises(TypeError):
-            CellRange('A' )
-        with self.assertRaises(TypeError):
-            CellRange('B' )
+
+    def test_singleton_rows_or_columns_ok(self):
+        self.assertEqual(CellRange('01').posn(), ((0,0),(0,0)) )
+        self.assertEqual(CellRange('02').posn(), ((0,1),(0,1)) )
+        self.assertEqual(CellRange('A' ).posn(), ((0,0),(0,0)) )
+        self.assertEqual(CellRange('B' ).posn(), ((1,0),(1,0)) )
 
     def test_missing_row_numbers_fails(self):
         with self.assertRaises(TypeError):
@@ -122,6 +126,34 @@ class test_cell_set_name(unittest.TestCase):
             CellRange('A1:Z')
         with self.assertRaises(TypeError):
             CellRange('A:Z')
+
+    def test_missing_column_names_fails(self):
+        with self.assertRaises(TypeError):
+            CellRange('1:A2')
+        with self.assertRaises(TypeError):
+            CellRange('A1:2')
+        with self.assertRaises(TypeError):
+            CellRange('1:2')
+
+    def test_missing_half_range_fails(self):
+        with self.assertRaises(TypeError):
+            CellRange('A1:')
+        with self.assertRaises(TypeError):
+            CellRange(':B1')
+
+    def test_wrong_colon_count_fails(self):
+        with self.assertRaises(TypeError):
+            CellRange(':')
+        with self.assertRaises(TypeError):
+            CellRange('::')
+        with self.assertRaises(TypeError):
+            CellRange('A1:B2:C3')
+
+    def test_wrong_name_orientation_fails(self):
+        with self.assertRaises(TypeError):
+            CellRange('B1:A1')
+        with self.assertRaises(TypeError):
+            CellRange('A2:B1')
 
     def test_set_name_A(self):
         self.assertEqual(CellRange('A1').posn(), ((0,0),(0,0)) )

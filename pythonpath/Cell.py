@@ -16,8 +16,15 @@ class Cell(object):
     Cell(0,2)  #column 0, row 2
     Cell('A3') #ditto, but as written on the spreadsheet
 
-    Ignores $ signs. Raises TypeError if any numerical coordinates
-    are <= 0 or if a name does not specify a complete column row.
+    Ignores $ signs.
+
+    Raises TypeError if:
+    - 2 argument form
+      - any numerical coordinate is not integer
+      - any numerical coordinate < zero
+    - 1 argument form:
+      - name coordinate is not string
+      - name row coordinate < 1
 
     Methods:
 
@@ -47,8 +54,10 @@ class Cell(object):
     def name(self): return self._posn2name((self.col, self.row))
 
     def _set_by_posn(self, col=0, row=0):
+        #check type
         if not isinstance(col, int) or not isinstance(row, int):
             raise TypeError("cell positions must be integers")
+        #check sign
         if col < 0 or row < 0:
             raise TypeError("cell positions cannot be negative")
 
@@ -56,8 +65,10 @@ class Cell(object):
         self.row = row
 
     def _set_by_name(self, name=''):
+        #check type
         if not isinstance(name, str):
             raise TypeError("cell name must be a string")
+        #check not a cell range
         if name.find(':') > -1:
             raise TypeError("cell name must not be a range")
 
@@ -68,16 +79,11 @@ class Cell(object):
             (self.col, self.row) = (0, 0)
             return
 
-        m = re.match(r'[A-Z]+', name)
-        if not m:
-            raise TypeError("missing cell column in '{}'".format(name))
-            
-        m = re.match(r'[A-Z]+([0-9]+)$', name)
-        if not m:
-            raise TypeError("missing cell row in '{}'".format(name))
+        m = re.search(r'^(?:[A-Z]+)?([0-9]+)$', name)
 
-        if int(m.group(1)) < 1:
-            raise TypeError("cell row < 1 in '{}'".format(name))
+        #check numeric row part
+        if m and int(m.group(1)) < 1:
+            raise TypeError("cell name row part must be integer")
 
         (self.col, self.row) = self._name2posn(name)
 
