@@ -43,7 +43,7 @@ class CellRange(object):
     posn('A1:C3')   =>  ((0,0), (2,2))
     """
 
-    #probably should be able to construct from 1 or 2 Cell() obects as well
+    #probably should be able to construct from 1 or 2 Cell() objects as well
 
     def __init__(self, *args):
         if len(args) == 0:
@@ -116,16 +116,14 @@ class CellRange(object):
             if end == '':
                 raise TypeError("end cell is missing in range")
             #check for missing row or column in cell on each side
-            if re.search(r'^[A-Z]+$', start):
-                raise TypeError("start cell must be a full column row pair")
-            if re.search(r'^[0-9]+$', start):
-                raise TypeError("start cell must be a full column row pair")
-            if re.search(r'^[A-Z]+$', end):
-                raise TypeError("end cell must be a full column row pair")
-            if re.search(r'^[0-9]+$', end):
-                raise TypeError("end cell must be a full column row pair")
+            if re.search(r'^[A-Z]+$', start) or re.search(r'^[0-9]+$', start):
+                raise TypeError("start cell must be a full column/row pair")
+            if re.search(r'^[A-Z]+$', end) or re.search(r'^[0-9]+$', end):
+                raise TypeError("end cell must be a full column/row pair")
         except:
+            #not a range: treat as range a:a
             start,end = name, name
+
         start,end = Cell(start), Cell(end)
         #check orientation
         if start.posn()[0] > end.posn()[0]:
