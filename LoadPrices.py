@@ -1,14 +1,11 @@
 ###########################################################################
-import sys
-import os
-import re
-
-###########################################################################
 # start logging
 # https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
 ###########################################################################
+import sys
 import logging
-import platform
+import platform  #for logging system
+import uno       #for pythonpath
 
 LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
 LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)-25s] %(message)s'
@@ -22,7 +19,7 @@ tmp.setFormatter(logging.Formatter(LOGFORMAT))
 Logger.addHandler(tmp)
 del tmp
 
-Logger.debug("Start")
+Logger.info("Start")
 Logger.info(str(platform.uname()))
 Logger.info("Python %s", sys.version)
 
@@ -34,15 +31,13 @@ DOC = XSCRIPTCONTEXT.getDocument()
 ###########################################################################
 # embedded pythonpath and imports
 ###########################################################################
-import uno
-
 PYTHONPATH = '/Scripts/python/pythonpath'
 
 pythonpath = uno.fileUrlToSystemPath(DOC.URL) + PYTHONPATH
 if pythonpath not in sys.path: sys.path.append(pythonpath)
 del pythonpath
 
-Logger.debug("New path: " + str(sys.path))
+Logger.info("New path: " + str(sys.path))
 
 #embedded imports go here:
 from Yahoo import Yahoo
