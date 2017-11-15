@@ -36,7 +36,7 @@ class Yahoo(object):
 
         sym2key = self.yahoo_get_key_symbol_dict(keycolumn)
 
-        Logger.debug(str(sym2key))
+        #Logger.debug(str(sym2key))
 
         SheetAPI.clear_columns(sheet, keyrange, datacols)
 
@@ -47,15 +47,17 @@ class Yahoo(object):
         text = self.web.fetch(url)
         if not self.web.ok():
             raise KeyError("fetch URL {} FAILED".format(url))
+            Logger.critical(str(self.web))
 
         dataDict = self.yahoo_parse_json(text)
 
-        Logger.debug(dataDict)
+        #Logger.debug(dataDict)
 
+        #repopulate datadict
         for s,k in sym2key.items():
             dataDict[k] = dataDict[s]
 
-        Logger.debug(dataDict)
+        #Logger.debug(dataDict)
 
         SheetAPI.write_columns(sheet, keyrange, datacols, dataDict)
 
@@ -125,7 +127,7 @@ class Yahoo(object):
                     currency = val.replace('GBp', 'GBX')
                     continue
 
-            Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
+            #Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
 
             data[symbol] = [price, currency]
             text = m.group(2)

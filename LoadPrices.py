@@ -1,45 +1,50 @@
 ###########################################################################
-# start logging
-# https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
-###########################################################################
 import sys
 import logging
 import platform  #for logging system
 import uno       #for pythonpath
 
+###########################################################################
+# globals
+###########################################################################
+# LO/OO spreadsheet
+DOC = XSCRIPTCONTEXT.getDocument()
+
+# logging
+LOGNAME = 'LoadPrices'
 LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
 LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)-25s] %(message)s'
 LOGLEVEL = logging.DEBUG
 
-Logger = logging.getLogger('LoadPrices')
-Logger.setLevel(LOGLEVEL)
+# embedded pythonpath
+PYTHONPATH = '/Scripts/python/pythonpath'
 
-tmp = logging.FileHandler(LOGFILE)
-tmp.setFormatter(logging.Formatter(LOGFORMAT))
-Logger.addHandler(tmp)
-del tmp
+###########################################################################
+# https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
+def createLogger(logname, logfile, logformat, loglevel):
+    Logger = logging.getLogger(logname)
+    Logger.setLevel(loglevel)
+    tmp = logging.FileHandler(logfile)
+    tmp.setFormatter(logging.Formatter(logformat))
+    Logger.addHandler(tmp)
+    return Logger
+
+def appendToPath(doc, newpath):
+    pythonpath = uno.fileUrlToSystemPath(doc.URL) + newpath
+    if pythonpath not in sys.path:
+        sys.path.append(pythonpath)
+
+###########################################################################
+Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL)
+
+appendToPath(DOC, PYTHONPATH)
 
 Logger.info("Start")
 Logger.info(str(platform.uname()))
 Logger.info("Python %s", sys.version)
-
-###########################################################################
-# LibreOffice/OpenOffice globals
-###########################################################################
-DOC = XSCRIPTCONTEXT.getDocument()
-
-###########################################################################
-# embedded pythonpath and imports
-###########################################################################
-PYTHONPATH = '/Scripts/python/pythonpath'
-
-pythonpath = uno.fileUrlToSystemPath(DOC.URL) + PYTHONPATH
-if pythonpath not in sys.path: sys.path.append(pythonpath)
-del pythonpath
-
 Logger.info("New path: " + str(sys.path))
 
-#embedded imports go here:
+# import embedded
 from Yahoo import Yahoo
 from LO_Controls import messageBox
 
