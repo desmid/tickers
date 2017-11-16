@@ -27,15 +27,15 @@ class WebAgent(object):
 
     Constructor and usage:
 
-    webAgent = WebAgent()
+    agent = WebAgent()
 
-    html = webAgent.fetch(url)
+    html = agent.fetch(url)
 
-    if webAgent.ok():
+    if agent.ok():
         print(html)
     else:
-        print( "Diagnostics:\n" + str(webAgent) )
-        if webAgent.response_code() == 404:
+        print( "Diagnostics:\n" + str(agent) )
+        if agent.status_code() == 404:
            #do something with this situation
         ...
         
@@ -45,14 +45,14 @@ class WebAgent(object):
       returns 'no response' if URL cannot be retrieved after preset retries
       and timeouts, or is invalid.
 
-    ok()              returns True/False as fetch succeeded/failed
+    ok()           returns True/False as fetch succeeded/failed
 
-    url()             returns original URL
-    real_url()        returns real URL retrieved
-    response_code()   returns HTTP response code as integer (200, 404, etc.)
-    error()           returns exception/error condition
-    info()            returns server headers as a dict (Content-Type, etc.)
-    html()            returns already fetched web page
+    url()          returns original URL
+    real_url()     returns real URL retrieved
+    status_code()  returns HTTP response code as integer (200, 404, etc.)
+    error()        returns exception/error condition
+    info()         returns server headers as a dict (Content-Type, etc.)
+    html()         returns already fetched web page
 
     See: https://docs.python.org/3.4/howto/urllib2.html  (Python3)
          https://docs.python.org/2/howto/urllib2.html    (Python2)
@@ -169,12 +169,12 @@ class WebAgent(object):
         if self.state['error'] == self.NoError: return True
         return False
 
-    def html(self):          return self.state['html']
-    def response_code(self): return self.state['status']
-    def url(self):           return self.state['url']
-    def real_url(self):      return self.state['realurl']
-    def error(self):         return self.state['error']
-    def info(self):          return self.state['info']
+    def html(self):        return self.state['html']
+    def status_code(self): return self.state['status']
+    def url(self):         return self.state['url']
+    def real_url(self):    return self.state['realurl']
+    def error(self):       return self.state['error']
+    def info(self):        return self.state['info']
 
 ###########################################################################
 if __name__ == '__main__':
