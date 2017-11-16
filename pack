@@ -3,6 +3,7 @@
 TARGET=t
 ODS=test.ods
 
+rm -fr   t/Scripts/python
 mkdir -p t/Scripts/python
 
 cp -fpr dev/LoadPrices.py dev/pythonpath $TARGET/Scripts/python

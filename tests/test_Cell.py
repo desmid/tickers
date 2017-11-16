@@ -1,6 +1,7 @@
 import unittest
 
-from Cell import Cell
+import context
+from LibreOffice.Cell import Cell
 
 ###########################################################################
 class test_Cell_constructor(unittest.TestCase):
@@ -184,5 +185,9 @@ class test_Cell_compare(unittest.TestCase):
         d = Cell('A2')
         self.assertFalse(c == d)
         self.assertTrue(c != d)
+
+###########################################################################
+if __name__ == '__main__':
+    unittest.main()
 
 ###########################################################################

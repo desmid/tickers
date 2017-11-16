@@ -1,7 +1,7 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: LO_Controls")
+Logger.debug("Load: LibreOffice.Controls")
 
 ###########################################################################
 # spreadsheet controls

@@ -1,7 +1,7 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: WebAgent")
+Logger.debug("Load: Utils.WebAgent")
 
 ###########################################################################
 import sys

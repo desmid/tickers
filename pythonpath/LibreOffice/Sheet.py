@@ -1,7 +1,7 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: SheetAPI")
+Logger.debug("Load: LibreOffice.Sheet")
 
 ###########################################################################
 def read_column(sheet, posn):

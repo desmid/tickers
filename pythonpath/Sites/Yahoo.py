@@ -1,13 +1,13 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: Yahoo")
+Logger.debug("Load: Sites.Yahoo")
 
 ###########################################################################
 import re
-import CellRange
-import SheetAPI
-import WebAgent
+from LibreOffice import CellRange
+from LibreOffice import Sheet
+from Utils import WebAgent
 
 ###########################################################################
 class Yahoo(object):
@@ -32,13 +32,13 @@ class Yahoo(object):
         Logger.debug('keyrange: ' + str(keyrange))
         Logger.debug('datacols: ' + str(datacols))
 
-        keycolumn = SheetAPI.read_column(sheet, keyrange)
+        keycolumn = Sheet.read_column(sheet, keyrange)
 
         sym2key = self.yahoo_get_key_symbol_dict(keycolumn)
 
         #Logger.debug(str(sym2key))
 
-        SheetAPI.clear_columns(sheet, keyrange, datacols)
+        Sheet.clear_columns(sheet, keyrange, datacols)
 
         url = self.yahoo_build_url_with_symbols(sym2key.keys())
 
@@ -59,7 +59,7 @@ class Yahoo(object):
 
         #Logger.debug(dataDict)
 
-        SheetAPI.write_columns(sheet, keyrange, datacols, dataDict)
+        Sheet.write_columns(sheet, keyrange, datacols, dataDict)
 
     @classmethod
     def yahoo_get_key_symbol_dict(self, keycolumn):

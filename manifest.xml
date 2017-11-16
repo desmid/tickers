@@ -9,20 +9,35 @@
  <manifest:file-entry manifest:full-path="manifest.rdf" manifest:media-type="application/rdf+xml"/>
  <manifest:file-entry manifest:full-path="Configurations2/accelerator/current.xml" manifest:media-type=""/>
  <manifest:file-entry manifest:full-path="Configurations2/" manifest:media-type="application/vnd.sun.xml.ui.configuration"/>
-<!-- Scripts: macros -->
- <manifest:file-entry manifest:full-path="Scripts/python/LoadPrices.py" manifest:media-type="application/binary"/>
-<!-- Scripts: libs -->
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LO_Controls.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/WebAgent.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/SheetAPI.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Yahoo.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/CellRange.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Cell.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/__init__.py" manifest:media-type="application/binary"/>
-<!-- Scripts: paths -->
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/" manifest:media-type="application/binary"/>
+
+ <!-- Scripts:-->
+
+ <!-- Scripts: top-level paths -->
  <manifest:file-entry manifest:full-path="Scripts/" manifest:media-type="application/binary"/>
-<!-- Scripts end -->
+ <manifest:file-entry manifest:full-path="Scripts/python/" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/" manifest:media-type="application/binary"/>
+
+ <!-- Scripts: macros -->
+ <manifest:file-entry manifest:full-path="Scripts/python/LoadPrices.py" manifest:media-type="application/binary"/>
+
+ <!-- Scripts: libs: LibreOffice -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/__init__.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/Cell.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/CellRange.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/Controls.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/Sheet.py" manifest:media-type="application/binary"/>
+
+ <!-- Scripts: Sites -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Sites" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Sites/__init__.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Sites/Yahoo.py" manifest:media-type="application/binary"/>
+
+ <!-- Scripts: Utils -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Utils" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Utils/__init__.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Utils/WebAgent.py" manifest:media-type="application/binary"/>
+
+ <!-- Scripts: end -->
 
 </manifest:manifest>

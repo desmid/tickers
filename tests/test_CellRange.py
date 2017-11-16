@@ -1,6 +1,7 @@
 import unittest
 
-from CellRange import CellRange
+import context
+from LibreOffice.CellRange import CellRange
 
 ###########################################################################
 class test_CellRange_constructor(unittest.TestCase):
@@ -212,5 +213,9 @@ class test_CellRange_compare(unittest.TestCase):
         d = CellRange('A2:Z12')
         self.assertFalse(c == d)
         self.assertTrue(c != d)
+
+###########################################################################
+if __name__ == '__main__':
+    unittest.main()
 
 ###########################################################################
