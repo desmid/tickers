@@ -29,15 +29,15 @@ def createLogger(logname, logfile, logformat, loglevel):
     Logger.addHandler(tmp)
     return Logger
 
-def appendToPath(doc, newpath):
+def prependPath(doc, newpath):
     pythonpath = uno.fileUrlToSystemPath(doc.URL) + newpath
     if pythonpath not in sys.path:
-        sys.path.append(pythonpath)
+        sys.path.insert(0, pythonpath)
 
 ###########################################################################
 Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL)
 
-appendToPath(DOC, PYTHONPATH)
+prependPath(DOC, PYTHONPATH)
 
 Logger.info("Start")
 Logger.info(str(platform.uname()))
