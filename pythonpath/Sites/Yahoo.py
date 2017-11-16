@@ -34,13 +34,13 @@ class Yahoo(object):
 
         keycolumn = Sheet.read_column(sheet, keyrange)
 
-        sym2key = self.yahoo_get_key_symbol_dict(keycolumn)
+        sym2key = self.get_key_symbol_dict(keycolumn)
 
         #Logger.debug(str(sym2key))
 
         Sheet.clear_columns(sheet, keyrange, datacols)
 
-        url = self.yahoo_build_url_with_symbols(sym2key.keys())
+        url = self.build_url_with_symbols(sym2key.keys())
 
         Logger.debug(url)
 
@@ -49,7 +49,7 @@ class Yahoo(object):
             raise KeyError("fetch URL {} FAILED".format(url))
             Logger.critical(str(self.web))
 
-        dataDict = self.yahoo_parse_json(text)
+        dataDict = self.parse_json(text)
 
         #Logger.debug(dataDict)
 
@@ -61,8 +61,7 @@ class Yahoo(object):
 
         Sheet.write_columns(sheet, keyrange, datacols, dataDict)
 
-    @classmethod
-    def yahoo_get_key_symbol_dict(self, keycolumn):
+    def get_key_symbol_dict(self, keycolumn):
         d = {}
         for key in keycolumn:
             m = self.CRE_EPIC.search(key)
@@ -87,12 +86,10 @@ class Yahoo(object):
                 continue
         return d
 
-    @classmethod
-    def yahoo_build_url_with_symbols(self, symbols):
+    def build_url_with_symbols(self, symbols):
         return self.URL_YAHOO + 'symbols=' + ','.join(symbols)
 
-    @classmethod
-    def yahoo_parse_json(self, text):
+    def parse_json(self, text):
         m = re.search(r'.*?\[(.*?)\].*', text)
         if not m: return {}
         text = m.group(1)
@@ -117,7 +114,6 @@ class Yahoo(object):
                 if 'symbol' == key:
                     symbol = val
                     continue
-
 
                 if 'regularMarketPrice' == key:
                     price = val
