@@ -1,16 +1,31 @@
 #!/bin/sh
 
-TARGET=t
-ODS=test.ods
+DEV=./dev
+MACROS=LoadPrices.py
 
-rm -fr   t/Scripts/python
-mkdir -p t/Scripts/python
+MASTER=$DEV/Templates/empty.ods
+TARGET=test.ods
+BUILD=t
 
-cp -fpr dev/LoadPrices.py dev/pythonpath $TARGET/Scripts/python
-cp -f dev/manifest.xml $TARGET/META-INF
+[ ! -d $DEV ] \
+    && echo "$DEV missing - not in top-level directory" 1>&2 \
+    && exit 1
 
-rm -f $ODS
+#fresh zipfile
+rm -fr $BUILD
+unzip  $MASTER -d $BUILD
 
-(cd $TARGET; $HOME/pub/bin/rpurge; zip -r ../$ODS .)
+#manifest
+rm -fr   $BUILD/META-INF/*
+cp -fp   $DEV/manifest.xml $BUILD/META-INF
 
-ls -lt $ODS*
+#code
+rm -fr   $BUILD/Scripts/python
+mkdir -p $BUILD/Scripts/python
+cp -fpr  $DEV/$MACROS $DEV/pythonpath $BUILD/Scripts/python
+
+rm -f $TARGET
+
+(cd $BUILD; $HOME/pub/bin/rpurge; zip -r ../$TARGET .)
+
+ls -lt $TARGET*
