@@ -5,8 +5,7 @@ Logger.debug("Load: Sites.Yahoo")
 
 ###########################################################################
 import re
-from LibreOffice import CellRange
-from LibreOffice import Sheet
+from LibreOffice import CellRange, Sheet
 from Utils import WebAgent
 
 ###########################################################################
