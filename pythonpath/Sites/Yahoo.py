@@ -19,7 +19,7 @@ class Yahoo(object):
     CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
     CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
 
-    def __init__(self, doc):
+    def __init__(self, doc=None):
         self.doc = doc
         self.web = WebAgent.WebAgent()
 
@@ -40,7 +40,7 @@ class Yahoo(object):
 
         Sheet.clear_columns(sheet, keyrange, datacols)
 
-        url = self.build_url_with_symbols(sym2key.keys())
+        url = self.build_url(sym2key.keys())
 
         Logger.debug(url)
 
@@ -50,6 +50,10 @@ class Yahoo(object):
             Logger.critical(str(self.web))
 
         dataDict = self.parse_json(text)
+
+        if len(dataDict) > 0:
+            #data[ticker] = [regularMarketPrice, currency]
+            dataDict['%formats'] = ['%f', '%s']
 
         #Logger.debug(dataDict)
 
@@ -86,17 +90,17 @@ class Yahoo(object):
                 continue
         return d
 
-    def build_url_with_symbols(self, symbols):
+    def build_url(self, symbols):
         return self.URL_YAHOO + 'symbols=' + ','.join(symbols)
 
     def parse_json(self, text):
+        data = {}
+
         m = re.search(r'.*?\[(.*?)\].*', text)
-        if not m: return {}
+        if not m: return data
         text = m.group(1)
 
         #data[ticker] = [regularMarketPrice, currency]
-        data = { '%formats' : ['%f', '%s'] }
-
         while text:
             m = re.search(r'.*?{(.*?)\}(.*)', text)
             if not m: break
@@ -120,7 +124,8 @@ class Yahoo(object):
                     continue
 
                 if 'currency' == key:
-                    currency = val.replace('GBp', 'GBX')
+                    #currency = val.replace('GBp', 'GBX')
+                    currency = val
                     continue
 
             #Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
