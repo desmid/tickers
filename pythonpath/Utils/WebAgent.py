@@ -45,14 +45,14 @@ class WebAgent(object):
       returns 'no response' if URL cannot be retrieved after preset retries
       and timeouts, or is invalid.
 
-    ok() :            returns True/False as fetch succeeded/failed
+    ok()              returns True/False as fetch succeeded/failed
 
-    html() :          returns already fetched web page;
-    response_code() : returns HTTP response code as integer (200, 404, etc.)
-    url() :           returns original URL
-    real_url() :      returns real URL retrieved
-    error() :         returns exception/error condition
-    info() :          rerturns server headers as a dict (Content-Type, etc.)
+    url()             returns original URL
+    real_url()        returns real URL retrieved
+    response_code()   returns HTTP response code as integer (200, 404, etc.)
+    error()           returns exception/error condition
+    info()            returns server headers as a dict (Content-Type, etc.)
+    html()            returns already fetched web page
 
     See: https://docs.python.org/3.4/howto/urllib2.html  (Python3)
          https://docs.python.org/2/howto/urllib2.html    (Python2)

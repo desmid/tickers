@@ -36,11 +36,11 @@ class CellRange(object):
 
     Examples:
 
-    posn()          =>  ((0,0), (0,0))
-    posn('')        =>  ((0,0), (0,0))
-    posn('A:Z')     =>  ((0,0), (25,0))
-    posn('A1:A99')  =>  ((0,0), (0,98))
-    posn('A1:C3')   =>  ((0,0), (2,2))
+    posn()          returns  ((0,0), (0,0))
+    posn('')        returns  ((0,0), (0,0))
+    posn('A:Z')     returns  ((0,0), (25,0))
+    posn('A1:A99')  returns  ((0,0), (0,98))
+    posn('A1:C3')   returns  ((0,0), (2,2))
     """
 
     #probably should be able to construct from 1 or 2 Cell() objects as well

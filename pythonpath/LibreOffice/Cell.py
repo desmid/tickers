@@ -28,7 +28,7 @@ class Cell(object):
 
     Methods:
 
-    posn()  returns the 0-based (column, row) coordinate as a tuple;
+    posn()  returns the 0-based (column, row) coordinate as a tuple
     name()  returns a named coordinate string.
     """
 
