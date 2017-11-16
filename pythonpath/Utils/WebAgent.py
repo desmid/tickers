@@ -35,7 +35,7 @@ class WebAgent(object):
         print(html)
     else:
         print( "Diagnostics:\n" + str(webAgent) )
-        if webAgent.get_response_code() == 404:
+        if webAgent.response_code() == 404:
            #do something with this situation
         ...
         
@@ -45,14 +45,14 @@ class WebAgent(object):
       returns 'no response' if URL cannot be retrieved after preset retries
       and timeouts, or is invalid.
 
-    ok() :                returns True/False as fetch succeeded/failed
+    ok() :            returns True/False as fetch succeeded/failed
 
-    get_html() :          returns already fetched web page;
-    get_response_code() : returns HTTP response code as integer (200, 404, etc.)
-    get_url() :           returns original URL
-    get_real_url() :      returns real URL retrieved
-    get_error() :         returns exception/error condition
-    get_info() :          rerturns server headers as a dict (Content-Type, etc.)
+    html() :          returns already fetched web page;
+    response_code() : returns HTTP response code as integer (200, 404, etc.)
+    url() :           returns original URL
+    real_url() :      returns real URL retrieved
+    error() :         returns exception/error condition
+    info() :          rerturns server headers as a dict (Content-Type, etc.)
 
     See: https://docs.python.org/3.4/howto/urllib2.html  (Python3)
          https://docs.python.org/2/howto/urllib2.html    (Python2)
@@ -76,7 +76,7 @@ class WebAgent(object):
         self.params = paramDict
         self.state = {
             'url':     None,  #supplied url
-            'geturl':  None,  #actual url retrieved (possible redirect)
+            'realurl': None,  #actual url retrieved (possible redirect)
             'status':  None,  #http response code (200, 404, etc)
             'error':   None,  #exception raised with error message of last try
             'tries':   None,  #number of tries
@@ -87,19 +87,24 @@ class WebAgent(object):
         self._reset_state()
         
     def _reset_state(self, url=None):
-        self.state['url']    = url
-        self.state['geturl'] = None
-        self.state['status'] = None
-        self.state['error']  = self.NoError
-        self.state['html']   = self.Deft_Html
-        self.state['info']   = {}
-        self.state['tries']  = 0
-        try:
-            self.state['timeout'] = self.params['webTimeOut']
-            if self.state['timeout'] < 1:
-                self.state['timeout'] = self.Deft_Timeout
-        except Exception as e:
-            self.state['timeout'] = self.Deft_Timeout
+
+        def get_timeout():
+            try:
+                t = int(self.params['webTimeOut'])
+                if t < 1:
+                    t = self.Deft_Timeout
+            except Exception:
+                t = self.Deft_Timeout
+            return t
+
+        self.state['url']     = url
+        self.state['realurl'] = None
+        self.state['status']  = None
+        self.state['error']   = self.NoError
+        self.state['tries']   = 0
+        self.state['timeout'] = get_timeout()
+        self.state['info']    = {}
+        self.state['html']    = self.Deft_Html
 
     def fetch(self, url):
         if not isinstance(url, str):
@@ -126,7 +131,7 @@ class WebAgent(object):
                 self.state['error'] = 'Exception: ' + str(e)
             else:
                 self.state['status'] = response.getcode()
-                self.state['geturl'] = response.geturl()
+                self.state['realurl'] = response.geturl()
                 self.state['info'] = response.info()
                 self.state['html'] = response.read().decode('utf-8', 'ignore')
                 self.state['error'] = self.NoError  #cleanup
@@ -148,12 +153,12 @@ class WebAgent(object):
             self.state['tries'], self.MaxTries, self.state['timeout'])
         s = ("  {:<}: {!s}" * 6)[2:]
         s = s.format(
-            'status', self.state['status'],
+            'status',  self.state['status'],
             'tries/max/timeout', triesmaxtime,
-            'error',  self.state['error'],
-            'url',    self.state['url'],
-            'geturl', self.state['geturl'],
-            'info',   sorted(self.state['info'].items()),
+            'error',   self.state['error'],
+            'url',     self.state['url'],
+            'realurl', self.state['realurl'],
+            'info',    sorted(self.state['info'].items()),
         )
         return s
 
@@ -164,12 +169,12 @@ class WebAgent(object):
         if self.state['error'] == self.NoError: return True
         return False
 
-    def get_html(self):        return self.state['html']
-    def get_response_code(self): return self.state['status']
-    def get_url(self):         return self.state['url']
-    def get_real_url(self):    return self.state['geturl']
-    def get_error(self):       return self.state['error']
-    def get_info(self):        return self.state['info']
+    def html(self):          return self.state['html']
+    def response_code(self): return self.state['status']
+    def url(self):           return self.state['url']
+    def real_url(self):      return self.state['realurl']
+    def error(self):         return self.state['error']
+    def info(self):          return self.state['info']
 
 ###########################################################################
 if __name__ == '__main__':
@@ -182,47 +187,47 @@ if __name__ == '__main__':
 
     url = 1234
     print('')
-    print('Trying: ' + str(url))
+    print('Trying URL: ' + str(url))
     o.fetch(url)
     if o.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
     print(o)
-    print(o.get_html())
+    print(o.html())
 
     url = 'this is garbage'
     print('')
-    print('Trying: ' + url)
+    print('Trying URL: ' + url)
     o.fetch(url)
     if o.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
     print(o)
-    print(o.get_html())
+    print(o.html())
 
     url = make_url('https://valid.looking.url', [('d',4), ('e',5), ('f',6)])
     print('')
-    print('Trying: ' + url)
+    print('Trying URL: ' + url)
     o.fetch(url)
     if o.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
     print(o)
-    print(o.get_html())
+    print(o.html())
 
     url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=^FTSE,^FTAS'
     print('')
-    print('Trying: ' + url)
+    print('Trying URL: ' + url)
     o.fetch(url)
     if o.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
     print(o)
-    print(o.get_html())
+    print(o.html())
 
     print('End')
 
