@@ -25,9 +25,8 @@ def clear_columns(sheet, keyrange, datacols, flags=5):
             cell.clearContents(flags)
         row += 1
 
-def write_columns(sheet, keyrange, datacols, datadict):
+def write_columns(sheet, keyrange, datacols, datadict, formats):
     if len(datadict) < 1: return
-    formats = datadict['%formats']
     ((keycol,rowfirst), (_, rowlast)) = keyrange
     for row in range(rowfirst, rowlast+1):
         key = sheet.getCellByPosition(keycol, row).getString()

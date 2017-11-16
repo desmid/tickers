@@ -51,10 +51,6 @@ class Yahoo(object):
 
         dataDict = self.parse_json(text)
 
-        if len(dataDict) > 0:
-            #data[ticker] = [regularMarketPrice, currency]
-            dataDict['%formats'] = ['%f', '%s']
-
         #Logger.debug(dataDict)
 
         #repopulate datadict
@@ -63,7 +59,7 @@ class Yahoo(object):
 
         #Logger.debug(dataDict)
 
-        Sheet.write_columns(sheet, keyrange, datacols, dataDict)
+        Sheet.write_columns(sheet, keyrange, datacols, dataDict, ['%f', '%s'])
 
     def get_key_symbol_dict(self, keycolumn):
         d = {}
