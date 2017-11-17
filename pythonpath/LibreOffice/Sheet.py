@@ -4,20 +4,19 @@ Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: LibreOffice.Sheet")
 
 ###########################################################################
+# http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
+###########################################################################
+
 def read_column(sheet, posn):
-    ((keycol,rowfirst), (_, rowlast)) = posn
+    ((keycol,start_row), (_, end_row)) = posn
     return [
         sheet.getCellByPosition(keycol, row).getString()
-        for row in range(rowfirst, rowlast+1)
+        for row in range(start_row, end_row+1)
     ]
 
 def clear_columns(sheet, keyrange, datacols, flags=5):
-    """
-    http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
-    """
-    ((keycol,rowfirst), (_, rowlast)) = keyrange
-    for row in range(rowfirst, rowlast+1):
-        key = sheet.getCellByPosition(keycol, row).getString()
+    ((_,start_row), (_, end_row)) = keyrange
+    for row in range(start_row, end_row+1):
         for (col,_) in datacols:
             cell = sheet.getCellByPosition(col, row)
             item = cell.getString()
@@ -27,8 +26,8 @@ def clear_columns(sheet, keyrange, datacols, flags=5):
 
 def write_columns(sheet, keyrange, datacols, datadict, formats):
     if len(datadict) < 1: return
-    ((keycol,rowfirst), (_, rowlast)) = keyrange
-    for row in range(rowfirst, rowlast+1):
+    ((keycol,start_row), (_, end_row)) = keyrange
+    for row in range(start_row, end_row+1):
         key = sheet.getCellByPosition(keycol, row).getString()
         try:
             data = datadict[key]
