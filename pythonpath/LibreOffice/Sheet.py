@@ -7,22 +7,29 @@ Logger.debug("Load: LibreOffice.Sheet")
 # http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
 ###########################################################################
 
+from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, ANNOTATION, \
+    FORMULA, HARDATTR, STYLES, OBJECTS, EDITATTR, FORMATTED
+
+LO_CLEAR_FLAGS = (VALUE|STRING)
+
 def read_column(sheet, posn):
-    ((keycol,start_row), (_, end_row)) = posn
+    ((start_col,start_row), (_, end_row)) = posn
     return [
-        sheet.getCellByPosition(keycol, row).getString()
+        sheet.getCellByPosition(start_col, row).getString()
         for row in range(start_row, end_row+1)
     ]
 
-def clear_columns(sheet, keyrange, datacols, flags=5):
+def clear_column(sheet, keyrange, column, flags=LO_CLEAR_FLAGS):
     ((_,start_row), (_, end_row)) = keyrange
+    (col,_) = column
     for row in range(start_row, end_row+1):
-        for (col,_) in datacols:
+            #Logger.debug("clear_column({},{})".format(col, row))
             cell = sheet.getCellByPosition(col, row)
-            item = cell.getString()
-            #Logger.debug("clear({},{})={}".format(col, row, item))
             cell.clearContents(flags)
-        row += 1
+
+def clear_columns(sheet, keyrange, datacols, flags=LO_CLEAR_FLAGS):
+    for column in datacols:
+        clear_column(sheet, keyrange, column, flags)
 
 def write_columns(sheet, keyrange, datacols, datadict, formats):
     if len(datadict) < 1: return
