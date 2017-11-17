@@ -1,7 +1,7 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: Utils.WebAgent")
+Logger.debug("Load: Web.HttpAgent")
 
 ###########################################################################
 import sys
@@ -16,7 +16,7 @@ except:
     from urllib import urlencode
 
 ###########################################################################
-class WebAgent(object):
+class HttpAgent(object):
     """
     Class to access web pages. Wraps Python3 or Python2 implementation details.
     Keeps a record of the request:
@@ -27,7 +27,7 @@ class WebAgent(object):
 
     Constructor and usage:
 
-    agent = WebAgent()
+    agent = Web.HttpAgent()
 
     html = agent.fetch(url)
 
@@ -88,7 +88,7 @@ class WebAgent(object):
         
     def _reset_state(self, url=None):
 
-        def get_timeout():
+        def get_sane_timeout():
             try:
                 t = int(self.params['webTimeOut'])
                 if t < 1:
@@ -102,7 +102,7 @@ class WebAgent(object):
         self.state['status']  = None
         self.state['error']   = self.NoError
         self.state['tries']   = 0
-        self.state['timeout'] = get_timeout()
+        self.state['timeout'] = get_sane_timeout()
         self.state['info']    = {}
         self.state['html']    = self.Deft_Html
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
             return url + '?' + urlencode(values)
         return url
 
-    o = WebAgent()
+    o = HttpAgent()
 
     url = 1234
     print('')

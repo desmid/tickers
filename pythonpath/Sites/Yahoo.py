@@ -6,7 +6,7 @@ Logger.debug("Load: Sites.Yahoo")
 ###########################################################################
 import re
 from LibreOffice import CellRange, Sheet
-from Utils import WebAgent
+from Web import HttpAgent
 
 ###########################################################################
 class Yahoo(object):
@@ -20,7 +20,7 @@ class Yahoo(object):
 
     def __init__(self, doc=None):
         self.doc = doc
-        self.web = WebAgent.WebAgent()
+        self.web = HttpAgent()
 
     def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
         sheet = self.doc.getSheets().getByName(sheetname)
