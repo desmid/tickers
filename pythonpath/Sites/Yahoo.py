@@ -59,8 +59,7 @@ class Yahoo(object):
 
         Logger.debug(dataDict)
 
-        Sheet.write_column_list(sheet, keyrange, datacols, dataDict,
-                                ['%f', '%s'])
+        Sheet.write_block(sheet, keyrange, datacols, dataDict, ['%f', '%s'])
 
     def get_key_symbol_dict(self, keylist):
         d = {}

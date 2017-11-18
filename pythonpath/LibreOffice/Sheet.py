@@ -24,38 +24,39 @@ def clear_column(sheet, keyrange, column):
     ((_,start_row), (_,end_row)) = keyrange.posn()
     (col,_) = column.posn()
     for row in range(start_row, end_row+1):
-        #Logger.debug("clear_column({},{})".format(col, row))
         cell = sheet.getCellByPosition(col, row)
         cell.clearContents(LO_CLEAR_FLAGS)
+        #Logger.debug("clear_column({},{})".format(col, row))
 
 def clear_column_list(sheet, keyrange, columns):
     for column in columns:
         clear_column(sheet, keyrange, column)
 
-def write_column(sheet, keyrange, column, datadict, sformat, i):
+def write_row(sheet, row, datacols, data, formats):
+    for i,column in enumerate(datacols):
+        (col,_) = column.posn()
+        cell = sheet.getCellByPosition(col, row)
+        try:
+            datum, fmt = data[i], formats[i] 
+        except IndexError:
+            continue
+        if fmt == '%f':
+            cell.Value = float(datum)
+        elif fmt == '%s':
+            cell.String = str(datum)
+        else:
+            cell.String = str(datum)
+        #Logger.debug("write_row({},{})={}".format(col, row, datum))
+
+def write_block(sheet, keyrange, datacols, datadict, formats):
     if len(datadict) < 1: return
-    ((key_col,start_row), (_, end_row)) = keyrange.posn()
-    (col,_) = column.posn()
+    ((key_col,start_row), (_,end_row)) = keyrange.posn()
     for row in range(start_row, end_row+1):
         key = sheet.getCellByPosition(key_col, row).getString()
         try:
-            data = datadict[key][i]
+            data = datadict[key]
         except KeyError:
             continue
-        cell = sheet.getCellByPosition(col, row)
-        if sformat== '%f':
-            cell.Value = float(data)
-        elif sformat == '%s':
-            cell.String = str(data)
-        else:
-            cell.String = str(data)
-        #Logger.debug("write_column({},{},{})={}".format(col, row, key,
-        #                 sheet.getCellByPosition(col, row).getString()
-        #                                        ))
-
-def write_column_list(sheet, keyrange, datacols, datadict, formats):
-    if len(datadict) < 1: return
-    for i,column in enumerate(datacols):
-        write_column(sheet, keyrange, column, datadict, formats[i], i)
+        write_row(sheet, row, datacols, data, formats)
 
 ###########################################################################
