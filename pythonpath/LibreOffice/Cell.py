@@ -158,6 +158,9 @@ class Cell(object):
             name = chr(ORD_A + remainder) + name
         return name + str(row+1)
 
+    def __repr__(self):
+        return "Cell(%r,%r)" % (self.name(), self.posn())
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__

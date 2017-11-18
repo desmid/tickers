@@ -133,6 +133,9 @@ class CellRange(object):
 
         return (start, end)
 
+    def __repr__(self):
+        return "CellRange(%r,%r)" % (self.name(), self.posn())
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
