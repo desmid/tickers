@@ -26,40 +26,39 @@ class Yahoo(object):
     def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
         sheet = self.doc.getSheets().getByName(sheetname)
 
-        keyrange = CellRange(keys)
-        datacols = [Cell(col) for col in datacols]
+        keycolumn = CellRange(keys)
+        datacols = [Cell(c) for c in datacols]
 
-        Logger.debug('keyrange: ' + str(keyrange))
-        Logger.debug('datacols: ' + str(datacols))
+        Logger.debug('keycolumn: ' + str(keycolumn))
+        Logger.debug('datacols:  ' + str(datacols))
 
-        keylist = Sheet.read_column(sheet, keyrange)
+        keylist = Sheet.read_column(sheet, keycolumn)
+
+        Sheet.clear_column_list(sheet, keycolumn, datacols)
+
+        Logger.debug('keylist: ' + str(keylist))
 
         sym2key = self.get_key_symbol_dict(keylist)
 
-        #Logger.debug(str(sym2key))
-
-        Sheet.clear_column_list(sheet, keyrange, datacols)
-
         url = self.build_url(sym2key.keys())
 
-        Logger.debug(url)
+        Logger.debug('url: ' + url)
 
         text = self.web.fetch(url)
+
         if not self.web.ok():
             raise KeyError("fetch URL {} FAILED".format(url))
-            Logger.critical(str(self.web))
 
-        dataDict = self.parse_json(text)
+        prices = priceDict(text)
 
-        #Logger.debug(dataDict)
+        Logger.debug('prices: ' + str(prices.get_data()))
 
-        #repopulate datadict
-        for s,k in sym2key.items():
-            dataDict[k] = dataDict[s]
+        self.recover_prices4keys(sym2key, prices)
 
-        Logger.debug(dataDict)
+        Sheet.write_block(sheet, keycolumn, datacols, prices)
 
-        Sheet.write_block(sheet, keyrange, datacols, dataDict, ['%f', '%s'])
+    def build_url(self, tickers):
+        return self.URL_YAHOO + 'symbols=' + ','.join(tickers)
 
     def get_key_symbol_dict(self, keylist):
         d = {}
@@ -86,17 +85,52 @@ class Yahoo(object):
                 continue
         return d
 
-    def build_url(self, symbols):
-        return self.URL_YAHOO + 'symbols=' + ','.join(symbols)
+    def tickers(self):
+        return self.sym2key.keys()
 
-    def parse_json(self, text):
+    def recover_prices4keys(self, sym2key, prices):
+        for s,k in sym2key.items():
+            prices[k] = prices[s]
+
+###########################################################################
+class priceDict(object):
+    """
+    class behaves like a dict of Yahoo ticker key to price information:
+
+        data[ticker] = [regularMarketPrice, currency]
+
+    Constructor initialises and parses input json string.
+
+    data()  returns whole dictionary as a dict
+    object[key]  sets/returns value list for that key
+    formats() returns list of data formatting strings, ['%f', '%s']
+    formats(i) returns i'th of data formatting string
+    """
+    formats = ['%f', '%s']
+
+    def __init__(self, text=''):
+        self.data = self._parse_json(text)
+
+    def get_data(self): return self.data
+
+    def get_formats(self, i=None):
+        if i is not None:
+            return self.formats[i]
+        return self.formats
+
+    def __setitem__(self, key, item):
+        self.data[key] = item
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def _parse_json(self, text):
         data = {}
 
         m = re.search(r'.*?\[(.*?)\].*', text)
         if not m: return data
         text = m.group(1)
 
-        #data[ticker] = [regularMarketPrice, currency]
         while text:
             m = re.search(r'.*?{(.*?)\}(.*)', text)
             if not m: break
@@ -125,7 +159,6 @@ class Yahoo(object):
                     continue
 
             #Logger.debug("ypj: %s,%s,%s", symbol,price,currency)
-
             data[symbol] = [price, currency]
             text = m.group(2)
 

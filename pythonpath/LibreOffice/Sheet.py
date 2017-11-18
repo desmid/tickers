@@ -8,6 +8,7 @@ Logger.debug("Load: LibreOffice.Sheet")
 # https://api.libreoffice.org/docs/idl/ref/namespacecom_1_1sun_1_1star_1_1sheet_1_1CellFlags.html
 ###########################################################################
 
+import uno
 from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, ANNOTATION, \
     FORMULA, HARDATTR, STYLES, OBJECTS, EDITATTR, FORMATTED
 
@@ -32,13 +33,13 @@ def clear_column_list(sheet, keyrange, columns):
     for column in columns:
         clear_column(sheet, keyrange, column)
 
-def write_row(sheet, row, datacols, data, formats):
+def write_row(sheet, row, datacols, data, key):
     for i,column in enumerate(datacols):
         (col,_) = column.posn()
         cell = sheet.getCellByPosition(col, row)
         try:
-            datum, fmt = data[i], formats[i] 
-        except IndexError:
+            datum, fmt = data[key][i], data.get_formats(i)
+        except (KeyError, IndexError):
             continue
         if fmt == '%f':
             cell.Value = float(datum)
@@ -48,15 +49,11 @@ def write_row(sheet, row, datacols, data, formats):
             cell.String = str(datum)
         #Logger.debug("write_row({},{})={}".format(col, row, datum))
 
-def write_block(sheet, keyrange, datacols, datadict, formats):
-    if len(datadict) < 1: return
+def write_block(sheet, keyrange, datacols, data):
+    if len(data.get_data()) < 1: return
     ((key_col,start_row), (_,end_row)) = keyrange.posn()
     for row in range(start_row, end_row+1):
         key = sheet.getCellByPosition(key_col, row).getString()
-        try:
-            data = datadict[key]
-        except KeyError:
-            continue
-        write_row(sheet, row, datacols, data, formats)
+        write_row(sheet, row, datacols, data, key)
 
 ###########################################################################
