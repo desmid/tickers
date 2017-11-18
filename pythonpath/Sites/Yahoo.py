@@ -26,19 +26,19 @@ class Yahoo(object):
     def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
         sheet = self.doc.getSheets().getByName(sheetname)
 
-        keyrange = CellRange(keys).posn()
-        datacols = [Cell(col).posn() for col in datacols]
+        keyrange = CellRange(keys)
+        datacols = [Cell(col) for col in datacols]
 
         Logger.debug('keyrange: ' + str(keyrange))
         Logger.debug('datacols: ' + str(datacols))
 
-        keycolumn = Sheet.read_column(sheet, keyrange)
+        keylist = Sheet.read_column(sheet, keyrange)
 
-        sym2key = self.get_key_symbol_dict(keycolumn)
+        sym2key = self.get_key_symbol_dict(keylist)
 
         #Logger.debug(str(sym2key))
 
-        Sheet.clear_columns(sheet, keyrange, datacols)
+        Sheet.clear_column_list(sheet, keyrange, datacols)
 
         url = self.build_url(sym2key.keys())
 
@@ -57,13 +57,14 @@ class Yahoo(object):
         for s,k in sym2key.items():
             dataDict[k] = dataDict[s]
 
-        #Logger.debug(dataDict)
+        Logger.debug(dataDict)
 
-        Sheet.write_columns(sheet, keyrange, datacols, dataDict, ['%f', '%s'])
+        Sheet.write_column_list(sheet, keyrange, datacols, dataDict,
+                                ['%f', '%s'])
 
-    def get_key_symbol_dict(self, keycolumn):
+    def get_key_symbol_dict(self, keylist):
         d = {}
-        for key in keycolumn:
+        for key in keylist:
             m = self.CRE_EPIC.search(key)
             if m:
                 Logger.debug('EPIC: ' + m.group(1))
