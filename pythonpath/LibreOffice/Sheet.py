@@ -38,7 +38,7 @@ def write_row(sheet, row, datacols, data, key):
         (col,_) = column.posn()
         cell = sheet.getCellByPosition(col, row)
         try:
-            datum, fmt = data[key][i], data.get_formats(i)
+            datum, fmt = data[key][i], data.formats(i)
         except (KeyError, IndexError):
             continue
         if fmt == '%f':
