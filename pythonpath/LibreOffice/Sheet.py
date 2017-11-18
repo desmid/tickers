@@ -50,7 +50,7 @@ def write_row(sheet, row, datacols, data, key):
         #Logger.debug("write_row({},{})={}".format(col, row, datum))
 
 def write_block(sheet, keyrange, datacols, data):
-    if len(data.get_data()) < 1: return
+    if len(data) < 1: return
     ((key_col,start_row), (_,end_row)) = keyrange.posn()
     for row in range(start_row, end_row+1):
         key = sheet.getCellByPosition(key_col, row).getString()

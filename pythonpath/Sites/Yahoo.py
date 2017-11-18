@@ -51,7 +51,7 @@ class Yahoo(object):
 
         prices = priceDict(text)
 
-        Logger.debug('prices: ' + str(prices.get_data()))
+        Logger.debug('prices: ' + str(prices))
 
         self.recover_prices4keys(sym2key, prices)
 
@@ -101,8 +101,8 @@ class priceDict(object):
 
     Constructor initialises and parses input json string.
 
-    data()  returns whole dictionary as a dict
     object[key]  sets/returns value list for that key
+    len(object)  returns size of dict
     formats() returns list of data formatting strings, ['%f', '%s']
     formats(i) returns i'th of data formatting string
     """
@@ -111,12 +111,13 @@ class priceDict(object):
     def __init__(self, text=''):
         self.data = self._parse_json(text)
 
-    def get_data(self): return self.data
-
     def get_formats(self, i=None):
         if i is not None:
             return self.formats[i]
         return self.formats
+
+    def __len__(self):
+        return len(self.data)
 
     def __setitem__(self, key, item):
         self.data[key] = item
@@ -163,5 +164,8 @@ class priceDict(object):
             text = m.group(2)
 
         return data
+
+    def __repr__(self):
+        return str(self.data) + ', fmt=' + str(self.formats)
 
 ###########################################################################
