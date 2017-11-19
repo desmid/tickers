@@ -1,0 +1,3 @@
+echo -n "Running: "
+python3 --version
+(cd /home/brown/TRADE/SOFTWARE/LibreOffice/dev/tests && nose2-3 "$@")
