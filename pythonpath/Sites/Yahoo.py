@@ -66,10 +66,20 @@ class keyTickerDict(object):
 
     URL_BASE = 'https://query1.finance.yahoo.com/v7/finance/quote?'
 
-    CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
-    CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
-    CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
-    CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
+    #some patterns could be combined, but easier to test separately:
+
+    #EPIC
+    CRE_EPIC       = re.compile(r'^([A-Z0-9]{2,4})$')           # BP
+    CRE_EPIC_DOT   = re.compile(r'^([A-Z0-9]{2,4})\.$')         # BP.
+    CRE_EPIC_FLOOR = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')   # BP.L
+
+    #index
+    CRE_INDEX      = re.compile(r'^(\^[A-Z0-9]+)$')             # ^FTSE
+
+    #currency pair
+    CRE_FXPAIR_X   = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X 
+    CRE_FXPAIR_SEP = re.compile(r'^([A-Z]{3})[:/]([A-Z]{3})$')  # EUR:GBP
+    CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
     def __init__(self, keylist):
         self.key2ticker = self._keys_to_tickers(keylist)
@@ -101,10 +111,16 @@ class keyTickerDict(object):
                 Logger.debug('EPIC: %s => %s' % (key, d[key]))
                 continue
 
-            m = self.CRE_EPIC_EX.search(key)
+            m = self.CRE_EPIC_DOT.search(key)
             if m:
                 d[key] = m.group(1)
-                Logger.debug('EPIC_EX: %s => %s' % (key, d[key]))
+                Logger.debug('EPIC_DOT: %s => %s' % (key, d[key]))
+                continue
+
+            m = self.CRE_EPIC_FLOOR.search(key)
+            if m:
+                d[key] = m.group(1)
+                Logger.debug('EPIC_FLOOR: %s => %s' % (key, d[key]))
                 continue
 
             m = self.CRE_INDEX.search(key)
@@ -113,10 +129,22 @@ class keyTickerDict(object):
                 Logger.debug('INDEX: %s => %s' % (key, d[key]))
                 continue
 
-            m = self.CRE_FXPAIR.search(key)
+            m = self.CRE_FXPAIR_X.search(key)
+            if m:
+                d[key] = m.group(1)
+                Logger.debug('FXPAIR_X: %s => %s' % (key, d[key]))
+                continue
+
+            m = self.CRE_FXPAIR_SEP.search(key)
+            if m:
+                d[key] = m.group(1) + m.group(2) + '=X'
+                Logger.debug('FXPAIR_SEP: %s => %s' % (key, d[key]))
+                continue
+
+            m = self.CRE_FXPAIR_CH6.search(key)
             if m:
                 d[key] = m.group(1) + '=X'
-                Logger.debug('FXPAIR: %s => %s' % (key, d[key]))
+                Logger.debug('FXPAIR_CH6: %s => %s' % (key, d[key]))
                 continue
         return d
 
