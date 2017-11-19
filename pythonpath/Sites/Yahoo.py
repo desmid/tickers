@@ -12,13 +12,6 @@ from Web import HttpAgent
 ###########################################################################
 class Yahoo(object):
 
-    URL_BASE = 'https://query1.finance.yahoo.com/v7/finance/quote?'
-
-    CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
-    CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
-    CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
-    CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
-
     def __init__(self, doc=None):
         self.doc = doc
         self.web = HttpAgent()
@@ -40,7 +33,7 @@ class Yahoo(object):
 
         prices = keyPriceDict(self, keylist)
 
-        url = self.build_url(prices.tickers())
+        url = prices.make_url()
 
         Logger.debug('url: ' + url)
 
@@ -55,10 +48,66 @@ class Yahoo(object):
 
         Sheet.write_block(sheet, keycolumn, datacols, prices)
 
-    def build_url(self, tickers):
+###########################################################################
+class keyPriceDict(object):
+    """
+    Provides a read-only dict of spreadsheet cell value to Yahoo price
+    information from a Yahoo generated JSON string:
+
+      keyPriceDict(list_of_sheet_cell_values)
+      keyPriceDict[cell_value] = [regularMarketPrice, currency]
+
+    keyPriceDict[key]  returns value list for that key or a default
+                       value if the key is non-whiespace and not matched
+    len(priceDict)     returns size of contained price dict
+    tickers()          returns list of extracted tickers
+    parse(text)        parses a Yahoo JSON string and stores the result
+    formats()          returns list of data formatting strings, ['%f', '%s']
+    formats(i)         returns i'th of data formatting string
+    """
+
+    URL_BASE = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+
+    CRE_EPIC    = re.compile(r'^([A-Z0-9]{2,4})\.?$')       # BP. => BP
+    CRE_EPIC_EX = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L => BP.L
+    CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
+    CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
+
+    def __init__(self, tickmaker, keylist):
+        self.key2tick = self._keys_to_tickers(keylist)
+        self.tick2price = None
+
+    def formats(self, i=None):
+        if i is None: return self.tick2price.formats()
+        return self.tick2price.formats(i)
+
+    def tickers(self):
+        return self.key2tick.values()
+
+    def make_url(self, tickers=None):
+        if tickers is None:
+            tickers = self.tickers()
         return self.URL_BASE + 'symbols=' + ','.join(tickers)
 
-    def map_keys_to_tickers(self, keylist):
+    def parse(self, text):
+        self.tick2price = priceDict(text)
+
+    def __repr__(self):
+        return str(self.tick2price)
+
+    def __len__(self):
+        return len(self.tick2price)
+
+    def __getitem__(self, key):
+        try:
+            ticker = self.key2tick[key]
+            return self.tick2price[ticker]
+        except KeyError:
+            if key.strip() != '':
+                return self.tick2price.defaults()
+        raise KeyError
+
+    def _keys_to_tickers(self, keylist):
         d = {}
         for key in keylist:
             m = self.CRE_EPIC.search(key)
@@ -85,53 +134,6 @@ class Yahoo(object):
                 Logger.debug('FXPAIR: %s => %s' % (key, d[key]))
                 continue
         return d
-
-###########################################################################
-class keyPriceDict(object):
-    """
-    Provides a read-only dict of spreadsheet cell value to Yahoo price
-    information from a Yahoo generated JSON string:
-
-      keyPriceDict(list_of_sheet_cell_values)
-      keyPriceDict[cell_value] = [regularMarketPrice, currency]
-
-    keyPriceDict[key]  returns value list for that key or a default
-                       value if the key is non-whiespace and not matched
-    len(priceDict)     returns size of contained price dict
-    tickers()          returns list of extracted tickers
-    parse(text)        parses a Yahoo JSON string and stores the result
-    formats()          returns list of data formatting strings, ['%f', '%s']
-    formats(i)         returns i'th of data formatting string
-    """
-
-    def __init__(self, tickmaker, keylist):
-        self.key2tick = tickmaker.map_keys_to_tickers(keylist)
-        self.tick2price = None
-
-    def formats(self, i=None):
-        if i is None: return self.tick2price.formats()
-        return self.tick2price.formats(i)
-
-    def tickers(self):
-        return self.key2tick.values()
-
-    def parse(self, text):
-        self.tick2price = priceDict(text)
-
-    def __repr__(self):
-        return str(self.tick2price)
-
-    def __len__(self):
-        return len(self.tick2price)
-
-    def __getitem__(self, key):
-        try:
-            ticker = self.key2tick[key]
-            return self.tick2price[ticker]
-        except KeyError:
-            if key.strip() != '':
-                return self.tick2price.defaults()
-        raise KeyError
 
 ###########################################################################
 class priceDict(object):
