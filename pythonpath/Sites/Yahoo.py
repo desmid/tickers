@@ -30,8 +30,8 @@ class Yahoo(object):
 
         Logger.debug('keylist: ' + str(keylist))
 
-        tickers = tickerDict(keylist)
-        prices = keyPriceDict(keylist, tickers)
+        tickers = keyTickerDict(keylist)
+        prices = keyPriceDict(tickers)
         url = tickers.url()
 
         Logger.debug('url: ' + url)
@@ -48,16 +48,16 @@ class Yahoo(object):
         Sheet.write_block(sheet, keycolumn, datacols, prices)
 
 ###########################################################################
-class tickerDict(object):
+class keyTickerDict(object):
     """
     Provides a read-only dict of spreadsheet cell value to Yahoo ticker.
 
     Constructor
-      tickerDict(list_of_sheet_cell_values)
+      keyTickerDict(list_of_sheet_cell_values)
 
     Operators
-      tickerDict[key]  returns ticker for that key.
-      len(tickerDict)  returns number of tickers.
+      keyTickerDict[key]  returns ticker for that key.
+      len(keyTickerDict)  returns number of tickers.
 
     Methods
       tickers()  returns list of extracted tickers.
@@ -72,10 +72,10 @@ class tickerDict(object):
     CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
 
     def __init__(self, keylist):
-        self.key2tick = self._keys_to_tickers(keylist)
+        self.key2ticker = self._keys_to_tickers(keylist)
 
     def tickers(self):
-        return self.key2tick.values()
+        return self.key2ticker.values()
 
     def url(self, tickers=None):
         if tickers is None:
@@ -83,14 +83,14 @@ class tickerDict(object):
         return self.URL_BASE + 'symbols=' + ','.join(tickers)
 
     def __repr__(self):
-        return str(self.key2tick)
+        return str(self.key2ticker)
 
     def __len__(self):
-        return len(self.key2tick)
+        return len(self.key2ticker)
 
     def __getitem__(self, key):
         key = key.strip()
-        return self.key2tick[key]
+        return self.key2ticker[key]
 
     def _keys_to_tickers(self, keylist):
         d = {}
@@ -127,7 +127,7 @@ class keyPriceDict(object):
     information from a Yahoo generated JSON string.
 
     Constructor
-      keyPriceDict(list_of_sheet_cell_values)
+      keyPriceDict(keyTickerDict)
 
     Operators
       keyPriceDict[key]  returns price list for that key:
@@ -146,8 +146,8 @@ class keyPriceDict(object):
       IndexError  if names/formats index lookup fails.
     """
 
-    def __init__(self, keylist, tickers):
-        self.key2tick = tickers
+    def __init__(self, key2ticker):
+        self.key2ticker = key2ticker
         self.tick2price = None
 
     def names(self, i=None):
@@ -169,7 +169,7 @@ class keyPriceDict(object):
 
     def __getitem__(self, key):
         try:
-            ticker = self.key2tick[key]
+            ticker = self.key2ticker[key]
             return self.tick2price[ticker]
         except KeyError:
             if key.strip() != '':  #whitespace or empty
