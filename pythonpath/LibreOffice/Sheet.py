@@ -14,6 +14,15 @@ from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, ANNOTATION, \
 
 LO_CLEAR_FLAGS = (VALUE|STRING)
 
+from LibreOffice import Cell, CellRange
+
+def asCellRange(item):
+    if isinstance(item, str):
+        return CellRange(item)
+    if isinstance(item, list):
+        return [asCellRange(i) for i in item]
+    raise TypeError("asCellRange() unexpected type '%s'" % str(item))
+
 def read_column(sheet, cells):
     ((start_col,start_row), (_,end_row)) = cells.posn()
     return [
@@ -23,7 +32,7 @@ def read_column(sheet, cells):
 
 def clear_column(sheet, keyrange, column):
     ((_,start_row), (_,end_row)) = keyrange.posn()
-    (col,_) = column.posn()
+    ((col,_),(_,_)) = column.posn()
     for row in range(start_row, end_row+1):
         cell = sheet.getCellByPosition(col, row)
         cell.clearContents(LO_CLEAR_FLAGS)
@@ -35,7 +44,7 @@ def clear_column_list(sheet, keyrange, columns):
 
 def write_row(sheet, row, datacols, data, key):
     for i,column in enumerate(datacols):
-        (col,_) = column.posn()
+        ((col,_),(_,_)) = column.posn()
         cell = sheet.getCellByPosition(col, row)
         try:
             datum, fmt = data[key][i], data.formats(i)

@@ -5,7 +5,6 @@ Logger.debug("Load: Sites.Yahoo")
 
 ###########################################################################
 import re
-from LibreOffice import Cell, CellRange
 from LibreOffice import Sheet
 from Web import HttpAgent
 
@@ -19,8 +18,8 @@ class Yahoo(object):
     def get(self, sheetname='Sheet1', keys='A2:A200', datacols=['B']):
         sheet = self.doc.getSheets().getByName(sheetname)
 
-        keycolumn = CellRange(keys)
-        datacols = [Cell(c) for c in datacols]
+        keycolumn = Sheet.asCellRange(keys)
+        datacols  = Sheet.asCellRange(datacols)
 
         Logger.debug('keycolumn: ' + str(keycolumn))
         Logger.debug('datacols:  ' + str(datacols))
