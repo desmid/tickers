@@ -130,7 +130,7 @@ class keyPriceDict(object):
             return self.tick2price[ticker]
         except KeyError:
             if key.strip() != '':
-                return self.tick2price.default_item()
+                return self.tick2price.defaults()
         raise KeyError
 
 ###########################################################################
@@ -146,24 +146,33 @@ class priceDict(object):
 
     priceDict[key]  returns value for that key as list
     len(priceDict)  returns size of dict
-    default_item()  returns default value as list
-    formats()       returns list of data formatting strings, ['%f', '%s']
-    formats(i)      returns i'th of data formatting string
+    names()         returns list of column names
+    names(i)        returns i'th column name
+    formats()       returns list of formatting strings, ['%f', '%s']
+    formats(i)      returns i'th formatting string
+    defaults        returns list of default values
+    defaults(i)     returns i'th default value
     data()          returns whole internal dict
     """
 
-    FORMATS = ['%f', '%s']
-    DEFAULT = [0, 'n/a']
+    NAMES    = ['regularMarketPrice', 'currency']
+    FORMATS  = ['%f', '%s']
+    DEFAULTS = [0, 'n/a']
 
     def __init__(self, text=''):
         self._data = self._parse_json(text)
 
-    def default_item(self):
-        return self.DEFAULT
+    def names(self, i=None):
+        if i is None: return self.NAMES
+        return self.NAMES[i]
 
     def formats(self, i=None):
         if i is None: return self.FORMATS
         return self.FORMATS[i]
+
+    def defaults(self, i=None):
+        if i is None: return self.DEFAULTS
+        return self.DEFAULTS[i]
 
     def data(self):
         return self._data
