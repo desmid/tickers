@@ -30,9 +30,9 @@ class Yahoo(object):
 
         Logger.debug('keylist: ' + str(keylist))
 
-        prices = keyPriceDict(self, keylist)
-
-        url = prices.make_url()
+        tickers = tickerDict(keylist)
+        prices = keyPriceDict(keylist, tickers)
+        url = tickers.url()
 
         Logger.debug('url: ' + url)
 
@@ -48,21 +48,20 @@ class Yahoo(object):
         Sheet.write_block(sheet, keycolumn, datacols, prices)
 
 ###########################################################################
-class keyPriceDict(object):
+class tickerDict(object):
     """
-    Provides a read-only dict of spreadsheet cell value to Yahoo price
-    information from a Yahoo generated JSON string:
+    Provides a read-only dict of spreadsheet cell value to Yahoo ticker.
 
-      keyPriceDict(list_of_sheet_cell_values)
-      keyPriceDict[cell_value] = [regularMarketPrice, currency]
+    Constructor
+      tickerDict(list_of_sheet_cell_values)
 
-    keyPriceDict[key]  returns value list for that key or a default
-                       value if the key is non-whiespace and not matched
-    len(priceDict)     returns size of contained price dict
-    tickers()          returns list of extracted tickers
-    parse(text)        parses a Yahoo JSON string and stores the result
-    formats()          returns list of data formatting strings, ['%f', '%s']
-    formats(i)         returns i'th of data formatting string
+    Operators
+      tickerDict[key]  returns ticker for that key.
+      len(tickerDict)  returns number of tickers.
+
+    Methods
+      tickers()  returns list of extracted tickers.
+      url()      returns completed URL using (optionally supplied) tickers.
     """
 
     URL_BASE = 'https://query1.finance.yahoo.com/v7/finance/quote?'
@@ -72,39 +71,26 @@ class keyPriceDict(object):
     CRE_INDEX   = re.compile(r'^(\^[A-Z0-9]+)$')            # ^FTSE => ^FTSE
     CRE_FXPAIR  = re.compile(r'^((?:[A-Z]{6}){1})(?:=X)?$') # EURGBP=X => EURGBP
 
-    def __init__(self, tickmaker, keylist):
+    def __init__(self, keylist):
         self.key2tick = self._keys_to_tickers(keylist)
-        self.tick2price = None
-
-    def formats(self, i=None):
-        if i is None: return self.tick2price.formats()
-        return self.tick2price.formats(i)
 
     def tickers(self):
         return self.key2tick.values()
 
-    def make_url(self, tickers=None):
+    def url(self, tickers=None):
         if tickers is None:
             tickers = self.tickers()
         return self.URL_BASE + 'symbols=' + ','.join(tickers)
 
-    def parse(self, text):
-        self.tick2price = priceDict(text)
-
     def __repr__(self):
-        return str(self.tick2price)
+        return str(self.key2tick)
 
     def __len__(self):
-        return len(self.tick2price)
+        return len(self.key2tick)
 
     def __getitem__(self, key):
-        try:
-            ticker = self.key2tick[key]
-            return self.tick2price[ticker]
-        except KeyError:
-            if key.strip() != '':
-                return self.tick2price.defaults()
-        raise KeyError
+        key = key.strip()
+        return self.key2tick[key]
 
     def _keys_to_tickers(self, keylist):
         d = {}
@@ -135,25 +121,87 @@ class keyPriceDict(object):
         return d
 
 ###########################################################################
+class keyPriceDict(object):
+    """
+    Provides a read-only dict of spreadsheet cell value to Yahoo price
+    information from a Yahoo generated JSON string.
+
+    Constructor
+      keyPriceDict(list_of_sheet_cell_values)
+
+    Operators
+      keyPriceDict[key]  returns price list for that key:
+                           [regularMarketPrice, currency]
+                         or a default list if the non-whitespace key is
+                         unmatched.
+      len(priceDict)     returns number of key,price pairs.
+
+    Methods
+      parse(text)  parses a Yahoo JSON string and stores the result.
+      formats()    returns list of data formatting strings, ['%f', '%s'].
+      formats(i)   returns i'th of data formatting string.
+
+    Raises
+      KeyError    if key lookup fails.
+      IndexError  if names/formats index lookup fails.
+    """
+
+    def __init__(self, keylist, tickers):
+        self.key2tick = tickers
+        self.tick2price = None
+
+    def names(self, i=None):
+        if i is None: return self.tick2price.names()
+        return self.tick2price.names(i)
+
+    def formats(self, i=None):
+        if i is None: return self.tick2price.formats()
+        return self.tick2price.formats(i)
+
+    def parse(self, text):
+        self.tick2price = priceDict(text)
+
+    def __repr__(self):
+        return str(self.tick2price)
+
+    def __len__(self):
+        return len(self.tick2price)
+
+    def __getitem__(self, key):
+        try:
+            ticker = self.key2tick[key]
+            return self.tick2price[ticker]
+        except KeyError:
+            if key.strip() != '':  #whitespace or empty
+                return self.tick2price.defaults()
+        raise KeyError
+
+###########################################################################
 class priceDict(object):
     """
     Provides a read-only dict of Yahoo ticker to Yahoo price information
-    from a Yahoo generated JSON string:
+    from a Yahoo generated JSON string.
 
+    Constructor
       priceDict(json_string)
-      priceDict[ticker] = [regularMarketPrice, currency]
 
-    Constructor initialises and parses input json string.
+    Operators
+      priceDict[key]  returns price list for that key:
+                        [regularMarketPrice, currency].
+      len(priceDict)  returns number of key,price pairs.
 
-    priceDict[key]  returns value for that key as list
-    len(priceDict)  returns size of dict
-    names()         returns list of column names
-    names(i)        returns i'th column name
-    formats()       returns list of formatting strings, ['%f', '%s']
-    formats(i)      returns i'th formatting string
-    defaults        returns list of default values
-    defaults(i)     returns i'th default value
-    data()          returns whole internal dict
+    Methods
+      names()      returns list of column names.
+      names(i)     returns i'th column name.
+      formats()    returns list of formatting strings, ['%f', '%s'].
+      formats(i)   returns i'th formatting string.
+      defaults     returns list of default values.
+      defaults(i)  returns i'th default value.
+      data()       returns whole internal dict.
+
+    Raises
+      KeyError    if key lookup fails.
+      IndexError  if names/formats/defaults index lookup fails.
     """
 
     NAMES    = ['regularMarketPrice', 'currency']
