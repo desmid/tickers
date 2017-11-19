@@ -38,7 +38,7 @@ def clear_column(sheet, keyrange, column):
         cell.clearContents(LO_CLEAR_FLAGS)
         #Logger.debug("clear_column({},{})".format(col, row))
 
-def clear_column_list(sheet, keyrange, columns):
+def clear_columns(sheet, keyrange, columns):
     for column in columns:
         clear_column(sheet, keyrange, column)
 

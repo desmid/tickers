@@ -26,7 +26,7 @@ class Yahoo(object):
 
         keylist = Sheet.read_column(sheet, keycolumn)
 
-        Sheet.clear_column_list(sheet, keycolumn, datacols)
+        Sheet.clear_columns(sheet, keycolumn, datacols)
 
         Logger.debug('keylist: ' + str(keylist))
 
