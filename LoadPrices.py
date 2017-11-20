@@ -15,18 +15,20 @@ LOGNAME = 'LoadPrices'
 LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
 LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)-25s] %(message)s'
 LOGLEVEL = logging.DEBUG
+LOGENABLE = True  #set to False to disable logging to logfile
 
 # embedded pythonpath
 PYTHONPATH = '/Scripts/python/pythonpath'
 
 ###########################################################################
 # https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
-def createLogger(logname, logfile, logformat, loglevel):
+def createLogger(logname, logfile, logformat, loglevel, enabled):
     Logger = logging.getLogger(logname)
     Logger.setLevel(loglevel)
-    tmp = logging.FileHandler(logfile)
-    tmp.setFormatter(logging.Formatter(logformat))
-    Logger.addHandler(tmp)
+    if enabled:
+        tmp = logging.FileHandler(logfile)
+        tmp.setFormatter(logging.Formatter(logformat))
+        Logger.addHandler(tmp)
     return Logger
 
 def prependPath(doc, newpath):
@@ -35,7 +37,7 @@ def prependPath(doc, newpath):
         sys.path.insert(0, pythonpath)
 
 ###########################################################################
-Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL)
+Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL, LOGENABLE)
 
 prependPath(DOC, PYTHONPATH)
 
