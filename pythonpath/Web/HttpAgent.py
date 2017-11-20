@@ -163,10 +163,10 @@ class HttpAgent(object):
         return s
 
     def ok(self):
-        #need redirect?
+        #expand to other status codes?
         if self.state['status'] == 200: return True
-        if self.state['html'] != self.Deft_Html: return True
         if self.state['error'] == self.NoError: return True
+        if self.state['html'] != self.Deft_Html: return True
         return False
 
     def html(self):        return self.state['html']
@@ -183,51 +183,51 @@ if __name__ == '__main__':
             return url + '?' + urlencode(values)
         return url
 
-    o = HttpAgent()
+    w = HttpAgent()
 
     url = 1234
     print('')
     print('Trying URL: ' + str(url))
-    o.fetch(url)
-    if o.ok():
+    w.fetch(url)
+    if w.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
-    print(o)
-    print(o.html())
+    print(w)
+    print(w.html())
 
     url = 'this is garbage'
     print('')
     print('Trying URL: ' + url)
-    o.fetch(url)
-    if o.ok():
+    w.fetch(url)
+    if w.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
-    print(o)
-    print(o.html())
+    print(w)
+    print(w.html())
 
     url = make_url('https://valid.looking.url', [('d',4), ('e',5), ('f',6)])
     print('')
     print('Trying URL: ' + url)
-    o.fetch(url)
-    if o.ok():
+    w.fetch(url)
+    if w.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
-    print(o)
-    print(o.html())
+    print(w)
+    print(w.html())
 
     url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=^FTSE,^FTAS'
     print('')
     print('Trying URL: ' + url)
-    o.fetch(url)
-    if o.ok():
+    w.fetch(url)
+    if w.ok():
         print("Fetch OK")
     else:
         print("Fetch FAILED")
-    print(o)
-    print(o.html())
+    print(w)
+    print(w.html())
 
     print('End')
 
