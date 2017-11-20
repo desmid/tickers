@@ -73,6 +73,10 @@ class CellRange(object):
             return self.start.name()
         return self.start.name() + ':' + self.end.name()
 
+    def update_from(self, master, force=False):
+        self.start.update_from(master.start, force)
+        self.end.update_from(master.end, force)
+
     def _set_by_posn_four(self, start_col=0, start_row=0, end_col=0, end_row=0):
         #check type
         if not isinstance(start_col, int) or not isinstance(start_row, int):

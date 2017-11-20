@@ -34,7 +34,8 @@ class Cell(object):
 
     def __init__(self, *args):
         if len(args) == 0:
-            self._set_by_posn()
+            self.col = None
+            self.row = None
             return
 
         if len(args) == 1:
@@ -49,18 +50,30 @@ class Cell(object):
             "Cell() takes 0, 1, 2 arguments ({} supplied)".format(len(*args))
         )
 
-    def posn(self): return (self.col, self.row)
+    def posn(self):
+        col, row = self.col, self.row
+        if col is None: col = 0
+        if row is None: row = 0
+        return (col, row)
 
     def name(self): return self._posn2name((self.col, self.row))
 
-    def _set_by_posn(self, col=0, row=0):
+    def update_from(self, master, force=False):
+        if self.col is None or force:
+            self.col = master.col
+        if self.row is None or force:
+            self.row = master.row
+
+    def _internal(self):
+        return (self.col, self.row)
+
+    def _set_by_posn(self, col, row):
         #check type
-        if not isinstance(col, int) or not isinstance(row, int):
+        if not (isinstance(col, int) and isinstance(row, int)):
             raise TypeError("cell positions must be integers")
         #check sign
         if col < 0 or row < 0:
             raise TypeError("cell positions cannot be negative")
-
         self.col = col
         self.row = row
 
@@ -76,16 +89,33 @@ class Cell(object):
         name = re.sub('\$', '', name)
 
         if name == '':
-            (self.col, self.row) = (0, 0)
+            self.col, self.row = (None, None)
             return
 
-        m = re.search(r'^(?:[A-Z]+)?([0-9]+)$', name)
+        m = re.search(r'^([A-Z]+)$', name)
+        if m:
+            c,r = self._name2posn(name)
+            self.col, self.row = c, None
+            return
 
-        #check numeric row part
-        if m and int(m.group(1)) < 1:
-            raise TypeError("cell name row part must be integer")
+        m = re.search(r'^([0-9]+)?$', name)
+        if m:
+            #check numeric row part
+            if int(m.group(1)) < 1:
+                raise TypeError("cell name row part must be integer")
+            c,r = self._name2posn(name)
+            self.col, self.row = None, r
+            return
 
-        (self.col, self.row) = self._name2posn(name)
+        m = re.search(r'^(?:[A-Z]+)([0-9]+)$', name)
+        if m:
+            #check numeric row part
+            if int(m.group(1)) < 1:
+                raise TypeError("cell name row part must be integer")
+            self.col, self.row = self._name2posn(name)
+            return
+
+        raise TypeError("cell name type not recognised")
 
     def _name2posn(self, n=''):
         """Convert spreadsheet cell names ('A1', AZ2', etc.) and return a
@@ -94,13 +124,10 @@ class Cell(object):
         Example usage and return values:
 
         _name2posn('')     =>  (0,0)
-        _name2posn('0')    =>  (0,0)
         _name2posn('A')    =>  (0,0)
-        _name2posn('A0')   =>  (0,0)
         _name2posn('A1')   =>  (0,0)
 
         _name2posn('B')    =>  (1,0)
-        _name2posn('B0')   =>  (1,0)
         _name2posn('B1')   =>  (1,0)
         _name2posn('B2')   =>  (1,1)
         _name2posn('Z')    =>  (25,0)
@@ -151,6 +178,8 @@ class Cell(object):
             col,row = p
         except:
             raise TypeError("cell positions must an integer pair")
+        if col is None: col = 0
+        if row is None: row = 0
         col += 1
         name = ""
         while col > 0:

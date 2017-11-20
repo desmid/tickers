@@ -215,6 +215,63 @@ class test_CellRange_compare(unittest.TestCase):
         self.assertTrue(c != d)
 
 ###########################################################################
+class test_CellRange_update(unittest.TestCase):
+    def test_update_row_number(self):
+        c = CellRange('A')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B51'))
+        self.assertEqual(c.name(), 'A51')
+        #
+        c = CellRange('A')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B51:B100'))
+        self.assertEqual(c.name(), 'A51:A100')
+
+    def test_update_column_name(self):
+        c = CellRange('1')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B100'))
+        self.assertEqual(c.name(), 'B1')
+        #
+        c = CellRange('1')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B51:B100'))
+        self.assertEqual(c.name(), 'B1')
+
+    def test_update_column_name_and_row_number(self):
+        c = CellRange('')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B100'))
+        self.assertEqual(c.name(), 'B100')
+        #
+        c = CellRange('')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B51:B100'))
+        self.assertEqual(c.name(), 'B51:B100')
+
+    def test_update_no_force(self):
+        c = CellRange('A1')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B100'))
+        self.assertEqual(c.name(), 'A1')
+        #
+        c = CellRange('A1')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B51:B100'))
+        self.assertEqual(c.name(), 'A1')
+
+    def test_update_force(self):
+        c = CellRange('A1')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B100'), force=True)
+        self.assertEqual(c.name(), 'B100')
+        #
+        c = CellRange('A1')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(CellRange('B51:B100'), force=True)
+        self.assertEqual(c.name(), 'B51:B100')
+
+###########################################################################
 if __name__ == '__main__':
     unittest.main()
 

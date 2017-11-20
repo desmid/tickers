@@ -16,53 +16,150 @@ LO_CLEAR_FLAGS = (VALUE|STRING)
 
 from LibreOffice import Cell, CellRange
 
-def asCellRange(item):
+###########################################################################
+class DataColumn(object):
+    """
+    """
+    def __init__(self, cells, data):
+        self.cellrange = cells
+        self.vec = data
+
+    def cells(self):
+        return self.cellrange
+
+    def rows(self):
+        return self.vec
+
+    def copy_empty(self, colname):
+        newcells = asCellRange(colname, template=self.cellrange)
+        return DataColumn(newcells, [''] * len(self.vec))
+
+    def __setitem__(self, i, val):
+        self.vec[i] = val
+
+    def __getitem__(self, i):
+        return self.vec[i]
+
+    def __repr__(self):
+        s = ','.join([str(c) for c in self.vec])
+        return str(self.cellrange) + ' [' + s + ']'
+
+###########################################################################
+class DataFrame(object):
+    """
+    """
+    def __init__(self, keycolumn, datacols):
+        self.frame = [ keycolumn.copy_empty(c) for c in datacols ]
+
+    def columns(self):
+        return self.frame
+
+    def __repr__(self):
+        s = ','.join([str(f) for f in self.frame])
+        return '[' + s + ']'
+
+###########################################################################
+def asCellRange(item, template=None):
     if isinstance(item, str):
-        return CellRange(item)
+        cr = CellRange(item)
+        if template is not None:
+            cr.update_from(template)
+        return cr
     if isinstance(item, list):
-        return [asCellRange(i) for i in item]
+        return [asCellRange(i, template) for i in item]
     raise TypeError("asCellRange() unexpected type '%s'" % str(item))
 
-def read_column(sheet, cells):
-    ((start_col,start_row), (_,end_row)) = cells.posn()
-    return [
+def check_arg_type(arg):
+    if isinstance(arg, str):
+        return asCellRange(arg)
+    if isinstance(arg, CellRange):
+        return arg
+    if isinstance(arg, DataColumn):
+        return arg.cells()
+    raise TypeError("argument must be a string or CellRange or DataColumn")
+
+def clear_dataframe(sheet, dataframe):
+    for column in dataframe.columns():
+        clear_column(sheet, column)
+
+def write_dataframe(sheet, dataframe):
+    for column in dataframe.columns():
+        write_column(sheet, column)
+
+def read_column(sheet, column, truncate=False):
+
+    def find_length(vec, end=''):
+        i = len(vec)
+        while i:
+            if vec[i-1] != end:
+                break
+            i -= 1
+        return i
+
+    cells = check_arg_type(column)
+
+    ((start_col,start_row), (end_col,end_row)) = cells.posn()
+
+    data = [
         sheet.getCellByPosition(start_col, row).getString()
         for row in range(start_row, end_row+1)
     ]
 
-def clear_column(sheet, keyrange, column):
-    ((_,start_row), (_,end_row)) = keyrange.posn()
-    ((col,_),(_,_)) = column.posn()
+    if truncate:
+        length = find_length(data)
+        data = data[:length]
+        if length > 0:
+            end_row = start_row + length -1
+        cells = CellRange(start_col,start_row, end_col,end_row)
+    return DataColumn(cells, data)
+
+def clear_column(sheet, column):
+    cells = check_arg_type(column)
+
+    ((start_col,start_row), (_,end_row)) = cells.posn()
+
     for row in range(start_row, end_row+1):
-        cell = sheet.getCellByPosition(col, row)
+        cell = sheet.getCellByPosition(start_col, row)
         cell.clearContents(LO_CLEAR_FLAGS)
-        #Logger.debug("clear_column({},{})".format(col, row))
+        #Logger.debug("clear_column({},{})".format(start_col, row))
 
-def clear_columns(sheet, keyrange, columns):
-    for column in columns:
-        clear_column(sheet, keyrange, column)
+def write_column(sheet, column):
+    cells = check_arg_type(column)
 
-def write_row(sheet, row, datacols, data, key):
-    for i,column in enumerate(datacols):
-        ((col,_),(_,_)) = column.posn()
-        cell = sheet.getCellByPosition(col, row)
-        try:
-            datum, fmt = data[key][i], data.formats(i)
-        except (KeyError, IndexError):
+    ((start_col,start_row), (_,end_row)) = cells.posn()
+
+    #Logger.debug('write_column: ' + str(cells))
+    for i,row in enumerate(range(start_row, end_row+1)):
+
+        cell = sheet.getCellByPosition(start_col, row)
+        
+        #Logger.debug('write_column:lookup: ' + str(i))
+        value = column[i]
+
+        if isinstance(value, float):
+            #Logger.debug("write_row({},{})={}".format(start_col, i, value))
+            cell.Value = value
             continue
-        if fmt == '%f':
-            cell.Value = float(datum)
-        elif fmt == '%s':
-            cell.String = str(datum)
-        else:
-            cell.String = str(datum)
-        #Logger.debug("write_row({},{})={}".format(col, row, datum))
 
-def write_block(sheet, keyrange, datacols, data):
-    if len(data) < 1: return
-    ((key_col,start_row), (_,end_row)) = keyrange.posn()
-    for row in range(start_row, end_row+1):
-        key = sheet.getCellByPosition(key_col, row).getString()
-        write_row(sheet, row, datacols, data, key)
+        if isinstance(value, int):
+            #Logger.debug("write_row({},{})={}".format(start_col, i, value))
+            cell.Value = value
+            continue
+
+        if isinstance(value, bool):
+            #Logger.debug("write_row({},{})={}".format(start_col, i, value))
+            if value is True:
+                cell.Value = 1
+            else:
+                cell.Value = 0
+            continue
+
+        if isinstance(value, str):
+            #Logger.debug("write_row({},{})={}".format(start_col, i, value))
+            cell.String = value
+            continue
+
+        #Logger.debug("write_row({},{})={}".format(start_col, i, value))
+        cell.String = str(value)
 
 ###########################################################################

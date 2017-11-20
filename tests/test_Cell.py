@@ -70,11 +70,11 @@ class test_Cell_set_name(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             Cell('$0')
-        # with self.assertRaises(TypeError):
-        #     Cell('$A')
         with self.assertRaises(TypeError):
             Cell('$A$0')
 
+        self.assertEqual(Cell('$A').posn(), (0,0))
+        self.assertEqual(Cell('$1').posn(), (0,0))
         self.assertEqual(Cell('$A$1').posn(), (0,0))
         self.assertEqual(Cell('$B$2').posn(), (1,1))
 
@@ -185,6 +185,52 @@ class test_Cell_compare(unittest.TestCase):
         d = Cell('A2')
         self.assertFalse(c == d)
         self.assertTrue(c != d)
+
+###########################################################################
+class test_Cell_update(unittest.TestCase):
+    def test_update_row_number(self):
+        c = Cell('A')
+        d = Cell('B100')
+        self.assertEqual(c._internal(), (0, None))
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(d)
+        self.assertEqual(c._internal(), (0, 99))
+        self.assertEqual(c.name(), 'A100')
+
+    def test_update_column_name(self):
+        c = Cell('1')
+        d = Cell('B100')
+        self.assertEqual(c._internal(), (None, 0))
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(d)
+        self.assertEqual(c._internal(), (1, 0))
+        self.assertEqual(c.name(), 'B1')
+
+    def test_update_column_name_and_row_number(self):
+        c = Cell('')
+        d = Cell('B100')
+        self.assertEqual(c._internal(), (None, None))
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(d)
+        self.assertEqual(c._internal(), (1, 99))
+        self.assertEqual(c.name(), 'B100')
+
+    def test_update_no_force(self):
+        c = Cell('A1')
+        d = Cell('B100')
+        self.assertEqual(c._internal(), (0, 0))
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(d)
+        self.assertEqual(c._internal(), (0, 0))
+        self.assertEqual(c.name(), 'A1')
+
+    def test_update_force(self):
+        c = Cell('A1')
+        d = Cell('B100')
+        self.assertEqual(c.name(), 'A1')
+        c.update_from(d, force=True)
+        self.assertEqual(c.name(), 'B100')
+
 
 ###########################################################################
 if __name__ == '__main__':
