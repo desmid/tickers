@@ -29,7 +29,7 @@ class Yahoo(object):
 
         sheet.clear_dataframe(dataframe)
 
-        keyticker = keyTicker(keydata.rows())
+        keyticker = KeyTicker(keydata.rows())
         Logger.debug('tickers: ' + str(keyticker.tickers()))
 
         url = keyticker.url()
@@ -40,7 +40,7 @@ class Yahoo(object):
         if not self.web.ok():
             raise KeyError("fetch URL {} FAILED".format(url))
 
-        pricedict = keyPriceDict(keyticker, text)
+        pricedict = PriceDict(keyticker, text)
         Logger.debug('pricedict: ' + str(pricedict))
 
         dataframe.update(pricedict)
@@ -49,7 +49,7 @@ class Yahoo(object):
         sheet.write_dataframe(dataframe)
 
 ###########################################################################
-class keyTicker(object):
+class KeyTicker(object):
     """
     """
 
@@ -138,79 +138,27 @@ class keyTicker(object):
         return ''
 
 ###########################################################################
-class keyPriceDict(object):
+class PriceDict(object):
     """
     Provides a read-only dict of spreadsheet cell value to Yahoo price
     information from a Yahoo generated JSON string.
 
     Constructor
-      keyPriceDict(keyTickerDict, text)
+      PriceDict(KeyTicker, text)
 
     Operators
-      keyPriceDict[key]  returns price list for that key:
-                           [regularMarketPrice, currency]
-                         or a default list if the non-whitespace key is
-                         unmatched.
-      len(priceDict)     returns number of key,price pairs.
-
-    Methods
-      formats()    returns list of data formatting strings, ['%f', '%s'].
-      formats(i)   returns i'th of data formatting string.
-
-    Raises
-      KeyError    if key lookup fails.
-      IndexError  if names/formats index lookup fails.
-    """
-
-    def __init__(self, key2ticker, text):
-        self.key2ticker = key2ticker
-        self.tick2price = priceDict(text)
-
-    def names(self, i=None):
-        if i is None: return self.tick2price.names()
-        return self.tick2price.names(i)
-
-    def formats(self, i=None):
-        if i is None: return self.tick2price.formats()
-        return self.tick2price.formats(i)
-
-    def __repr__(self):
-        return str(self.tick2price)
-
-    def __len__(self):
-        return len(self.tick2price)
-
-    def __getitem__(self, key):
-        try:
-            ticker = self.key2ticker[key]
-            return self.tick2price[ticker]
-        except KeyError:
-            if key.strip() != '':  #whitespace or empty
-                return self.tick2price.defaults()
-        return ''
-
-###########################################################################
-class priceDict(object):
-    """
-    Provides a read-only dict of Yahoo ticker to Yahoo price information
-    from a Yahoo generated JSON string.
-
-    Constructor
-      priceDict(json_string)
-
-    Operators
-      priceDict[key]  returns price list for that key:
-                        [regularMarketPrice, currency].
+      PriceDict[key]  returns price list for that key:
+                        [regularMarketPrice, currency]
+                      or a default list for an unmatched non-whitespace key.
       len(priceDict)  returns number of key,price pairs.
 
     Methods
       names()      returns list of column names.
       names(i)     returns i'th column name.
-      formats()    returns list of formatting strings, ['%f', '%s'].
-      formats(i)   returns i'th formatting string.
+      formats()    returns list of data formatting strings, ['%f', '%s'].
+      formats(i)   returns i'th data formatting string.
       defaults     returns list of default values.
       defaults(i)  returns i'th default value.
-      data()       returns whole internal dict.
 
     Raises
       KeyError    if key lookup fails.
@@ -221,8 +169,9 @@ class priceDict(object):
     FORMATS  = ['%f', '%s']
     DEFAULTS = [0, 'n/a']
 
-    def __init__(self, text=''):
-        self._data = self._parse_json(text)
+    def __init__(self, key2ticker, text):
+        self.key2ticker = key2ticker
+        self.tick2price = self._parse_json(text)
 
     def names(self, i=None):
         if i is None: return self.NAMES
@@ -236,17 +185,20 @@ class priceDict(object):
         if i is None: return self.DEFAULTS
         return self.DEFAULTS[i]
 
-    def data(self):
-        return self._data
-
     def __repr__(self):
-        return str(self._data) + ', fmt=' + str(self.FORMATS)
+        return str(self.tick2price) + ', fmt=' + str(self.FORMATS)
 
     def __len__(self):
-        return len(self._data)
+        return len(self.tick2price)
 
     def __getitem__(self, key):
-        return self._data[key]
+        try:
+            ticker = self.key2ticker[key]
+            return self.tick2price[ticker]
+        except KeyError:
+            if key.strip() != '':  #whitespace or empty
+                return self.defaults()
+        return ''
 
     def _parse_json(self, text=''):
         data = {}
