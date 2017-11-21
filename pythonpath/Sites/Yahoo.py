@@ -80,7 +80,7 @@ class KeyTicker(object):
                     if no argument).
     """
 
-    URL_BASE = 'https://query1.finance.yahoo.com/v7/finance/quote?'
+    URL_BASE = 'http://query1.finance.yahoo.com/v7/finance/quote?'
 
     #some patterns could be combined, but easier to test separately:
 
