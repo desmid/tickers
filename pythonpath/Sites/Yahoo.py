@@ -41,8 +41,7 @@ class Yahoo(object):
         if not self.web.ok():
             raise KeyError("fetch URL {} FAILED".format(url))
 
-        pricedict = keyPriceDict(keyticker)
-        pricedict.parse(text)
+        pricedict = keyPriceDict(keyticker, text)
         Logger.debug('pricedict: ' + str(pricedict))
 
         dataframe.update(pricedict)
@@ -146,7 +145,7 @@ class keyPriceDict(object):
     information from a Yahoo generated JSON string.
 
     Constructor
-      keyPriceDict(keyTickerDict)
+      keyPriceDict(keyTickerDict, text)
 
     Operators
       keyPriceDict[key]  returns price list for that key:
@@ -156,7 +155,6 @@ class keyPriceDict(object):
       len(priceDict)     returns number of key,price pairs.
 
     Methods
-      parse(text)  parses a Yahoo JSON string and stores the result.
       formats()    returns list of data formatting strings, ['%f', '%s'].
       formats(i)   returns i'th of data formatting string.
 
@@ -165,9 +163,9 @@ class keyPriceDict(object):
       IndexError  if names/formats index lookup fails.
     """
 
-    def __init__(self, key2ticker):
+    def __init__(self, key2ticker, text):
         self.key2ticker = key2ticker
-        self.tick2price = None
+        self.tick2price = priceDict(text)
 
     def names(self, i=None):
         if i is None: return self.tick2price.names()
@@ -176,9 +174,6 @@ class keyPriceDict(object):
     def formats(self, i=None):
         if i is None: return self.tick2price.formats()
         return self.tick2price.formats(i)
-
-    def parse(self, text):
-        self.tick2price = priceDict(text)
 
     def __repr__(self):
         return str(self.tick2price)
