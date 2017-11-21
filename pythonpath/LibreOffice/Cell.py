@@ -12,19 +12,19 @@ class Cell(object):
     """
     Represent a spreadsheet cell coordinate. Create with a zero-based
     numeric pair (column, row) or a name string, equivalently:
-    
-    Cell(0,2)  #column 0, row 2
-    Cell('A3') #ditto, but as written on the spreadsheet
+
+      Cell(0,2)  #column 0, row 2
+      Cell('A3') #ditto, but as written on the spreadsheet
 
     Ignores $ signs.
 
     Raises TypeError if:
-    - 2 argument form
-      - any numerical coordinate is not integer
-      - any numerical coordinate < zero
-    - 1 argument form:
-      - name coordinate is not string
-      - name row coordinate < 1
+      - 2 argument form
+        - any numerical coordinate is not integer
+        - any numerical coordinate < zero
+      - 1 argument form:
+        - name coordinate is not string
+        - name row coordinate < 1
 
     Methods
       posn()             returns the 0-based (column, row) as a pair.

@@ -67,7 +67,7 @@ class DataFrame(object):
     Represents a set of spreadsheet column ranges as a list of DataColumn
     objects of same dimension as a key DataColumn. The Datacolumns need not
     be adjacent or even in vertical register, but must be the same length
-    as the key column. 
+    as the key column.
 
       DataFrame(keycolumn, datacols)
 
@@ -206,7 +206,7 @@ class DataSheet(object):
         for i,row in enumerate(range(start_row, end_row+1)):
 
             cell = self.sheet.getCellByPosition(start_col, row)
-            
+
             #Logger.debug('write_column:lookup: ' + str(i))
             value = column[i]
 

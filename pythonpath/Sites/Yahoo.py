@@ -93,7 +93,7 @@ class KeyTicker(object):
     CRE_INDEX      = re.compile(r'^(\^[A-Z0-9]+)$')             # ^FTSE
 
     #currency pair
-    CRE_FXPAIR_X   = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X 
+    CRE_FXPAIR_X   = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X
     CRE_FXPAIR_SEP = re.compile(r'^([A-Z]{3})[:/]([A-Z]{3})$')  # EUR:GBP
     CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
@@ -187,11 +187,15 @@ class PriceDict(object):
 
     Methods
       names()      returns list of column names.
-      names(i)     returns i'th column name.
-      formats()    returns list of data formatting strings, ['%f', '%s'].
+      names(i)     returns i'th column name, eg., ['price', 'currency'].
+
+      formats()    returns list of data formatting strings, eg., ['%f', '%s'].
       formats(i)   returns i'th data formatting string.
-      defaults     returns list of default values.
+
+      defaults     returns list of default values, eg., [0, 'n/a'].
       defaults(i)  returns i'th default value.
+
+      data()       returns ticker to price list dict.
 
     Raises
       KeyError    if key lookup fails.
@@ -217,6 +221,9 @@ class PriceDict(object):
     def defaults(self, i=None):
         if i is None: return self.DEFAULTS
         return self.DEFAULTS[i]
+
+    def data(self):
+        return self.tick2price
 
     def __repr__(self):
         return str(self.tick2price) + ', fmt=' + str(self.FORMATS)

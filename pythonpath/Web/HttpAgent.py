@@ -38,7 +38,7 @@ class HttpAgent(object):
         if agent.status_code() == 404:
            #do something with this situation
         ...
-        
+
     Public methods:
 
     fetch(url) : fetches and returns the web page:
@@ -85,7 +85,7 @@ class HttpAgent(object):
             'html':    None,  #the retrieved page
         }
         self._reset_state()
-        
+
     def _reset_state(self, url=None):
 
         def get_sane_timeout():

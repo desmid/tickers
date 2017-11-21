@@ -14,21 +14,21 @@ class CellRange(object):
     Represent a spreadsheet cell coordinate range. Create with a
     zero-based numeric quadruple (column,row, column,row) or a name
     string 'A1:B20', equivalently:
-    
-    CellRange(0,2,3,4)  #(column 0, row 2) to (column 3, row 4)
-    CellRange('A3:D5')  #ditto, but as written on the spreadsheet
+
+      CellRange(0,2,3,4)  #(column 0, row 2) to (column 3, row 4)
+      CellRange('A3:D5')  #ditto, but as written on the spreadsheet
 
     Ignores $ signs.
 
     Raises TypeError if:
-    - 2 or 4 argument form
-      - any numerical coordinate is not integer
-      - any numerical coordinate < zero
-    - 1 argument form:
-      - name coordinate is not string
-      - either name row coordinate < 1
-      - start/end cells are in reverse order
-      - range is improper: no start, no end, more than one colon
+      - 2 or 4 argument form
+        - any numerical coordinate is not integer
+        - any numerical coordinate < zero
+      - 1 argument form:
+        - name coordinate is not string
+        - either name row coordinate < 1
+        - start/end cells are in reverse order
+        - range is improper: no start, no end, more than one colon
 
     Methods
       posn()             returns a tuple of pairs:
