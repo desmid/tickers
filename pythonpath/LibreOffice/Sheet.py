@@ -117,7 +117,7 @@ class DataSheet(object):
       asCellRange(string)  return a CellRange from a string.
       asCellRange(list)    return a list of CellRanges from list of strings.
 
-      read_column(colid)        return DataColumn from śpreadsheet.
+      read_column(colid)        return DataColumn from spreadsheet.
       clear_column(colid)       clear spreadsheet column.
       write_column(DataColumn)  write spreadsheet column from DataColumn.
 
@@ -135,18 +135,28 @@ class DataSheet(object):
             if template is not None:
                 cr.update_from(template)
             return cr
+        if isinstance(item, Cell):
+            cr = CellRange(item)
+            if template is not None:
+                cr.update_from(template)
+            return cr
+        if isinstance(item, CellRange):
+            cr = item
+            if template is not None:
+                cr.update_from(template)
+            return cr
         if isinstance(item, list):
             return [cls.asCellRange(i, template) for i in item]
         raise TypeError("unexpected type '%s'" % str(item))
 
-    def _check_arg_type(self, arg):
+    def _get_cells(self, arg):
         if isinstance(arg, str):
             return self.asCellRange(arg)
         if isinstance(arg, CellRange):
             return arg
         if isinstance(arg, DataColumn):
             return arg.cells()
-        raise TypeError("argument must be a string or CellRange or DataColumn")
+        raise TypeError("unexpected type '%s'" % str(arg))
 
     def _find_length(self, vec, end=''):
         i = len(vec)
@@ -157,7 +167,7 @@ class DataSheet(object):
         return i
 
     def read_column(self, column, truncate=False):
-        cells = self._check_arg_type(column)
+        cells = self._get_cells(column)
 
         ((start_col,start_row), (end_col,end_row)) = cells.posn()
 
@@ -175,7 +185,7 @@ class DataSheet(object):
         return DataColumn(cells, data)
 
     def clear_column(self, column):
-        cells = self._check_arg_type(column)
+        cells = self._get_cells(column)
 
         ((start_col,start_row), (_,end_row)) = cells.posn()
 
@@ -186,7 +196,7 @@ class DataSheet(object):
 
     def write_column(self, column):
         if not isinstance(column, DataColumn):
-            raise TypeError("argument must be a DataColumn")
+            raise TypeError("unexpected type '%s'" % str(column))
 
         cells = column.cells()
 
@@ -226,16 +236,16 @@ class DataSheet(object):
             #Logger.debug("write_row({},{})={}".format(start_col, i, value))
             cell.String = str(value)
 
-    def clear_dataframe(self, dataframe):
-        if not isinstance(dataframe, DataFrame):
-            raise TypeError("argument must be a DataFrame")
-        for column in dataframe.columns():
+    def clear_dataframe(self, frame):
+        if not isinstance(frame, DataFrame):
+            raise TypeError("unexpected type '%s'" % str(frame))
+        for column in frame.columns():
             self.clear_column(column)
 
-    def write_dataframe(self, dataframe):
-        if not isinstance(dataframe, DataFrame):
-            raise TypeError("argument must be a DataFrame")
-        for column in dataframe.columns():
+    def write_dataframe(self, frame):
+        if not isinstance(frame, DataFrame):
+            raise TypeError("unexpected type '%s'" % str(frame))
+        for column in frame.columns():
             self.write_column(column)
 
 ###########################################################################
