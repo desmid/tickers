@@ -5,7 +5,7 @@ Logger.debug("Load: Sites.Yahoo")
 
 ###########################################################################
 import re
-from LibreOffice import Sheet
+from LibreOffice.Sheet import DataSheet, DataFrame
 from Web import HttpAgent
 
 ###########################################################################
@@ -17,17 +17,18 @@ class Yahoo(object):
 
     def get(self, sheetname='Sheet1', keyrange='A2:A200', datacols=['B']):
         sheet = self.doc.getSheets().getByName(sheetname)
+        sheet = DataSheet(sheet)
 
         Logger.debug('keyrange:  ' + str(keyrange))
         Logger.debug('datacols:  ' + str(datacols))
 
-        keydata = Sheet.read_column(sheet, keyrange, truncate=True)
+        keydata = sheet.read_column(keyrange, truncate=True)
         Logger.debug('keydata: ' + str(keydata))
 
-        dataframe = Sheet.DataFrame(keydata, datacols)
+        dataframe = DataFrame(keydata, datacols)
         Logger.debug('dataframe: ' + str(dataframe))
 
-        Sheet.clear_dataframe(sheet, dataframe)
+        sheet.clear_dataframe(dataframe)
 
         urlticker = UrlData()
 
@@ -49,14 +50,14 @@ class Yahoo(object):
         self.update_dataframe(keydata, dataframe, pricedict)
         Logger.debug('dataframe: ' + str(dataframe))
 
-        Sheet.write_dataframe(sheet, dataframe)
+        sheet.write_dataframe(dataframe)
 
     def update_dataframe(self, keydata, dataframe, pricedict):
         for i,key in enumerate(keydata.rows()):
             for j,col in enumerate(dataframe.columns()):
-                Logger.debug("key: '%s'  (%d,%d)" % (key, i, j))
                 try:
                     col[i] = pricedict[key][j]
+                    Logger.debug("update: '%s'  (%d,%d)" % (key, i, j))
                 except IndexError:
                     break
 
