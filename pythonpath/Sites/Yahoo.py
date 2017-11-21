@@ -30,12 +30,10 @@ class Yahoo(object):
 
         sheet.clear_dataframe(dataframe)
 
-        urlticker = UrlData()
+        keyticker = keyTicker(keydata.rows())
+        Logger.debug('tickers: ' + str(keyticker.tickers()))
 
-        tickerdict = urlticker.ticker_dict(keydata.rows())
-        Logger.debug('tickers: ' + str(tickerdict.values()))
-
-        url = urlticker.url(tickerdict.values())
+        url = keyticker.url()
         Logger.debug('url: ' + url)
 
         text = self.web.fetch(url)
@@ -43,7 +41,7 @@ class Yahoo(object):
         if not self.web.ok():
             raise KeyError("fetch URL {} FAILED".format(url))
 
-        pricedict = keyPriceDict(tickerdict)
+        pricedict = keyPriceDict(keyticker)
         pricedict.parse(text)
         Logger.debug('pricedict: ' + str(pricedict))
 
@@ -62,7 +60,7 @@ class Yahoo(object):
                     break
 
 ###########################################################################
-class UrlData(object):
+class keyTicker(object):
     """
     """
 
@@ -83,18 +81,29 @@ class UrlData(object):
     CRE_FXPAIR_SEP = re.compile(r'^([A-Z]{3})[:/]([A-Z]{3})$')  # EUR:GBP
     CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
+    def __init__(self, data=[]):
+        self.key2tick = self.extract_tickers(data)
+
     def url(self, tickers=[]):
+        if len(tickers) < 1:
+            tickers = self.tickers()
         return self.URL_BASE + 'symbols=' + ','.join(tickers)
 
-    def ticker_dict(self, data):
+    def tickers(self):
+        return self.key2tick.values()
+
+    def __getitem__(self, key):
+        return self.key2tick[key]
+
+    def extract_tickers(self, data):
         d = {}
         for key in data:
-            ticker = self.extract_ticker(key)
+            ticker = self.match_ticker(key)
             if ticker != '':
                 d[key] = ticker
         return d
 
-    def extract_ticker(self, text=''):
+    def match_ticker(self, text=''):
         m = self.CRE_EPIC.search(text)
         if m:
             ticker = m.group(1)
