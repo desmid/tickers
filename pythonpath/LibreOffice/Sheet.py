@@ -25,7 +25,7 @@ class DataColumn(object):
       DataColumn(CellRange, list_of_values)
 
     Operators
-      DataColumn[i]  returns i'th data value.
+      DataColumn[i]       sets or returns i'th data value.
 
     Methods
       cells()             returns CellRange object
@@ -185,10 +185,10 @@ class DataSheet(object):
             #Logger.debug("clear_column({},{})".format(start_col, row))
 
     def write_column(self, column):
-        if isinstance(column, DataColumn):
-            cells = column.cells()
-        else:
+        if not isinstance(column, DataColumn):
             raise TypeError("argument must be a DataColumn")
+
+        cells = column.cells()
 
         ((start_col,start_row), (_,end_row)) = cells.posn()
 
@@ -227,10 +227,14 @@ class DataSheet(object):
             cell.String = str(value)
 
     def clear_dataframe(self, dataframe):
+        if not isinstance(dataframe, DataFrame):
+            raise TypeError("argument must be a DataFrame")
         for column in dataframe.columns():
             self.clear_column(column)
 
     def write_dataframe(self, dataframe):
+        if not isinstance(dataframe, DataFrame):
+            raise TypeError("argument must be a DataFrame")
         for column in dataframe.columns():
             self.write_column(column)
 
