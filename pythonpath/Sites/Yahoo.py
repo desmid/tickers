@@ -45,19 +45,10 @@ class Yahoo(object):
         pricedict.parse(text)
         Logger.debug('pricedict: ' + str(pricedict))
 
-        self.update_dataframe(keydata, dataframe, pricedict)
+        dataframe.update(pricedict)
         Logger.debug('dataframe: ' + str(dataframe))
 
         sheet.write_dataframe(dataframe)
-
-    def update_dataframe(self, keydata, dataframe, pricedict):
-        for i,key in enumerate(keydata.rows()):
-            for j,col in enumerate(dataframe.columns()):
-                try:
-                    col[i] = pricedict[key][j]
-                    Logger.debug("update: '%s'  (%d,%d)" % (key, i, j))
-                except IndexError:
-                    break
 
 ###########################################################################
 class keyTicker(object):

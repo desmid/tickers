@@ -49,10 +49,20 @@ class DataFrame(object):
     """
     """
     def __init__(self, keycolumn, datacols):
+        self.keycol = keycolumn
         self.frame = [ keycolumn.copy_empty(c) for c in datacols ]
 
     def columns(self):
         return self.frame
+
+    def update(self, datadict):
+        for i,key in enumerate(self.keycol.rows()):
+            for j,col in enumerate(self.frame):
+                try:
+                    col[i] = datadict[key][j]
+                    Logger.debug("update: '%s'  (%d,%d)" % (key, i, j))
+                except IndexError:
+                    break
 
     def __repr__(self):
         s = ','.join([str(f) for f in self.frame])
