@@ -16,8 +16,7 @@ class Yahoo(object):
         self.web = HttpAgent()
 
     def get(self, sheetname='Sheet1', keyrange='A2:A200', datacols=['B']):
-        sheet = self.doc.getSheets().getByName(sheetname)
-        sheet = DataSheet(sheet)
+        sheet = DataSheet(self.doc.getSheets().getByName(sheetname))
 
         Logger.debug('keyrange:  ' + str(keyrange))
         Logger.debug('datacols:  ' + str(datacols))
