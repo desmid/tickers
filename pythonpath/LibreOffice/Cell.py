@@ -26,10 +26,14 @@ class Cell(object):
       - name coordinate is not string
       - name row coordinate < 1
 
-    Methods:
+    Methods
+      posn()             returns the 0-based (column, row) as a pair.
+      name()             returns a named coordinate string.
+      update_from(Cell)  propagate Cell coordinates to this object.
 
-    posn()  returns the 0-based (column, row) coordinate as a tuple
-    name()  returns a named coordinate string.
+    Note: If the column or row component of a name string is not supplied,
+    ie., a naked row '2' or naked column 'B', the update_from() method can be
+    used later to propagate the missing fields from another Cell.
     """
 
     def __init__(self, *args):
@@ -47,7 +51,7 @@ class Cell(object):
             return
 
         raise TypeError(
-            "Cell() takes 0, 1, 2 arguments ({} supplied)".format(len(*args))
+            "cell takes 0, 1, 2 arguments ({} supplied)".format(len(*args))
         )
 
     def posn(self):
@@ -118,24 +122,26 @@ class Cell(object):
         raise TypeError("cell name type not recognised")
 
     def _name2posn(self, n=''):
-        """Convert spreadsheet cell names ('A1', AZ2', etc.) and return a
+        """
+        Convert spreadsheet cell names ('A1', AZ2', etc.) and return a
         pair of 0-based positions as a tuple: (column, row).
 
         Example usage and return values:
+          _name2posn('')     =>  (0,0)
+          _name2posn('A')    =>  (0,0)
+          _name2posn('A1')   =>  (0,0)
+          _name2posn('1')    =>  (0,0)
+          _name2posn('01')   =>  (0,0)
 
-        _name2posn('')     =>  (0,0)
-        _name2posn('A')    =>  (0,0)
-        _name2posn('A1')   =>  (0,0)
-
-        _name2posn('B')    =>  (1,0)
-        _name2posn('B1')   =>  (1,0)
-        _name2posn('B2')   =>  (1,1)
-        _name2posn('Z')    =>  (25,0)
-        _name2posn('AA')   =>  (26,0)
-        _name2posn('AZ')   =>  (51,0)
-        _name2posn('BA')   =>  (52,0)
-        _name2posn('ZZ')   =>  (701,0)
-        _name2posn('AAA')  =>  (702,0)
+          _name2posn('B')    =>  (1,0)
+          _name2posn('B1')   =>  (1,0)
+          _name2posn('B2')   =>  (1,1)
+          _name2posn('Z')    =>  (25,0)
+          _name2posn('AA')   =>  (26,0)
+          _name2posn('AZ')   =>  (51,0)
+          _name2posn('BA')   =>  (52,0)
+          _name2posn('ZZ')   =>  (701,0)
+          _name2posn('AAA')  =>  (702,0)
 
         """
         #0-based arithmetic
@@ -152,27 +158,27 @@ class Cell(object):
         return (c, r)
 
     def _posn2name(self, p=(0,0)):
-        """Convert spreadsheet cell positions as a pair (column, row) and
+        """
+        Convert spreadsheet cell positions as a pair (column, row) and
         return a cell name as a string: 'A1'
 
         Example usage and return values:
-     
-        _posn2name((0,0))    =>  'A1'
-        _posn2name((0,1))    =>  'A2'
-        _posn2name((1,0))    =>  'B1'
-        _posn2name((1,1))    =>  'B2'
+          _posn2name((0,0))    =>  'A1'
+          _posn2name((0,1))    =>  'A2'
+          _posn2name((1,0))    =>  'B1'
+          _posn2name((1,1))    =>  'B2'
 
-        _posn2name((25,0))   =>  'Z1'
-        _posn2name((26,0))   =>  'AA1'
-        _posn2name((27,0))   =>  'AB1'
+          _posn2name((25,0))   =>  'Z1'
+          _posn2name((26,0))   =>  'AA1'
+          _posn2name((27,0))   =>  'AB1'
 
-        _posn2name((51,0))   =>  'AZ1'
-        _posn2name((52,0))   =>  'BA1'
-        _posn2name((53,0))   =>  'BB1'
+          _posn2name((51,0))   =>  'AZ1'
+          _posn2name((52,0))   =>  'BA1'
+          _posn2name((53,0))   =>  'BB1'
 
-        _posn2name((701,0))  =>  'ZZ1'
-        _posn2name((702,0))  =>  'AAA1'
-        _posn2name((703,0))  =>  'AAB1'
+          _posn2name((701,0))  =>  'ZZ1'
+          _posn2name((702,0))  =>  'AAA1'
+          _posn2name((703,0))  =>  'AAB1'
         """
         try:
             col,row = p

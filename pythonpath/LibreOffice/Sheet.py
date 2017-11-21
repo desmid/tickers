@@ -19,7 +19,24 @@ from LibreOffice import CellRange
 ###########################################################################
 class DataColumn(object):
     """
+    Represents a spreadsheet column range as a CellRange object and a list
+    of data values.
+
+      DataColumn(CellRange, list_of_values)
+
+    Operators
+      DataColumn[i]  returns i'th data value.
+
+    Methods
+      cells()             returns CellRange object
+      rows()              returns data list
+      copy_empty(column)  returns an empty DataColumn of same dimension
+                          using colname to contruct its CellRange.
+
+    Raises
+      IndexError
     """
+
     def __init__(self, cells, data):
         self.cellrange = cells
         self.vec = data
@@ -47,19 +64,37 @@ class DataColumn(object):
 ###########################################################################
 class DataFrame(object):
     """
+    Represents a set of spreadsheet column ranges as a list of DataColumn
+    objects of same dimension as a key DataColumn. The Datacolumns need not
+    be adjacent or even in vertical register, but must be the same length
+    as the key column. 
+
+      DataFrame(keycolumn, datacols)
+
+    Methods
+      keycol()   returns keycol DataColumn.
+      columns()  returns DataColumn list.
+      update(dict[key] = [val1, val2, ...])
+                 iterates over self.keycol looking up keys in the supplied
+                 dict; values are written to the corresponding DataColumns
+                 to fill out the DataFrame.
     """
+
     def __init__(self, keycolumn, datacols):
         self.keycol = keycolumn
         self.frame = [ keycolumn.copy_empty(c) for c in datacols ]
+
+    def keycol(self):
+        return self.keycol
 
     def columns(self):
         return self.frame
 
     def update(self, datadict):
         for i,key in enumerate(self.keycol.rows()):
-            for j,col in enumerate(self.frame):
+            for j,column in enumerate(self.frame):
                 try:
-                    col[i] = datadict[key][j]
+                    column[i] = datadict[key][j]
                     Logger.debug("update: '%s'  (%d,%d)" % (key, i, j))
                 except IndexError:
                     break
@@ -70,6 +105,25 @@ class DataFrame(object):
 
 ###########################################################################
 class DataSheet(object):
+    """
+    Represents a spreadsheet with basic column and block operations.
+
+      DataSheet(libreoffice_sheet_object)
+
+    Let 'colid' represent any type convertible to CellRange or containing a
+    CellRange as its position (currently DataColumn).
+
+    Methods
+      asCellRange(string)  return a CellRange from a string.
+      asCellRange(list)    return a list of CellRanges from list of strings.
+
+      read_column(colid)        return DataColumn from śpreadsheet.
+      clear_column(colid)       clear spreadsheet column.
+      write_column(DataColumn)  write spreadsheet column from DataColumn.
+
+      clear_dataframe(DataFrame)  clear spreadsheet cells given by DataFrame.
+      write_dataframe(DataFrame)  write spreadsheet cells from DataFrame.
+    """
 
     def __init__(self, sheet):
         self.sheet = sheet
@@ -102,16 +156,7 @@ class DataSheet(object):
             i -= 1
         return i
 
-    def clear_dataframe(self, dataframe):
-        for column in dataframe.columns():
-            self.clear_column(column)
-
-    def write_dataframe(self, dataframe):
-        for column in dataframe.columns():
-            self.write_column(column)
-
     def read_column(self, column, truncate=False):
-
         cells = self._check_arg_type(column)
 
         ((start_col,start_row), (end_col,end_row)) = cells.posn()
@@ -140,7 +185,10 @@ class DataSheet(object):
             #Logger.debug("clear_column({},{})".format(start_col, row))
 
     def write_column(self, column):
-        cells = self._check_arg_type(column)
+        if isinstance(column, DataColumn):
+            cells = column.cells()
+        else:
+            raise TypeError("argument must be a DataColumn")
 
         ((start_col,start_row), (_,end_row)) = cells.posn()
 
@@ -177,5 +225,13 @@ class DataSheet(object):
 
             #Logger.debug("write_row({},{})={}".format(start_col, i, value))
             cell.String = str(value)
+
+    def clear_dataframe(self, dataframe):
+        for column in dataframe.columns():
+            self.clear_column(column)
+
+    def write_dataframe(self, dataframe):
+        for column in dataframe.columns():
+            self.write_column(column)
 
 ###########################################################################

@@ -10,6 +10,20 @@ from Web import HttpAgent
 
 ###########################################################################
 class Yahoo(object):
+    """
+    Spreadsheet driver for Yahoo queries.
+
+    Methods
+      get(sheetname, keyrange, datacols)
+
+         reads keyrange columns in sheetname, extracts Yahoo tickers,
+         assembles URL, fetches query, parses result, populates
+         keycols of spreadsheet.
+
+    Raises
+      KeyError  if web fetch fails.
+
+    """
 
     def __init__(self, doc=None):
         self.doc = doc
@@ -51,6 +65,19 @@ class Yahoo(object):
 ###########################################################################
 class KeyTicker(object):
     """
+    Provides a read-only dict of spreadsheet cell value to Yahoo tickers.
+
+    Constructor
+      KeyTicker(list_of_string)
+
+    Operators
+      KeyTicker[key]  returns ticker for that key or '' if unmatched.
+      len(Key)        returns number of stored tickers.
+
+    Methods
+      tickers()     returns stored tickers as list.
+      url(tickers)  returns composed URL using tickers (or stored tickers
+                    if no argument).
     """
 
     URL_BASE = 'https://query1.finance.yahoo.com/v7/finance/quote?'
@@ -71,28 +98,34 @@ class KeyTicker(object):
     CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
     def __init__(self, data=[]):
-        self.key2tick = self.extract_tickers(data)
+        self.key2tick = self._extract_tickers(data)
+
+    def tickers(self):
+        return self.key2tick.values()
 
     def url(self, tickers=[]):
         if len(tickers) < 1:
             tickers = self.tickers()
         return self.URL_BASE + 'symbols=' + ','.join(tickers)
 
-    def tickers(self):
-        return self.key2tick.values()
+    def __repr__(self):
+        return str(self.key2tick)
+
+    def __len__(self):
+        return len(self.key2tick)
 
     def __getitem__(self, key):
         return self.key2tick[key]
 
-    def extract_tickers(self, data):
+    def _extract_tickers(self, data):
         d = {}
         for key in data:
-            ticker = self.match_ticker(key)
+            ticker = self._match_ticker(key)
             if ticker != '':
                 d[key] = ticker
         return d
 
-    def match_ticker(self, text=''):
+    def _match_ticker(self, text=''):
         m = self.CRE_EPIC.search(text)
         if m:
             ticker = m.group(1)

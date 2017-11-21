@@ -30,17 +30,19 @@ class CellRange(object):
       - start/end cells are in reverse order
       - range is improper: no start, no end, more than one colon
 
-    Methods:
+    Methods
+      posn()             returns a tuple of pairs:
+                           ((start_column, start_row), (end_column, end_row))
+      name()             returns a named coordinate range as string.
+      update_from(CellRange)
+                         propagate CellRange coordinates to this object.
 
-    posn()  returns ((start_column, start_row), (end_column, end_row))
-
-    Examples:
-
-    posn()          returns  ((0,0), (0,0))
-    posn('')        returns  ((0,0), (0,0))
-    posn('A:Z')     returns  ((0,0), (25,0))
-    posn('A1:A99')  returns  ((0,0), (0,98))
-    posn('A1:C3')   returns  ((0,0), (2,2))
+    Examples
+      posn()          returns  ((0,0), (0,0))
+      posn('')        returns  ((0,0), (0,0))
+      posn('A:Z')     returns  ((0,0), (25,0))
+      posn('A1:A99')  returns  ((0,0), (0,98))
+      posn('A1:C3')   returns  ((0,0), (2,2))
     """
 
     #probably should be able to construct from 1 or 2 Cell() objects as well
