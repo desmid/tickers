@@ -1,7 +1,7 @@
 import unittest
 
 import context
-from LibreOffice.Cell import Cell
+from libreoffice.cell import Cell
 
 ###########################################################################
 class test_Cell_constructor(unittest.TestCase):

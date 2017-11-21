@@ -1,7 +1,7 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: LibreOffice.Sheet")
+Logger.debug("Load: libreoffice.datasheet")
 
 ###########################################################################
 # http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
@@ -14,7 +14,7 @@ from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, ANNOTATION, \
 
 LO_CLEAR_FLAGS = (VALUE|STRING)
 
-from LibreOffice import CellRange
+from libreoffice import CellRange
 
 ###########################################################################
 class DataColumn(object):

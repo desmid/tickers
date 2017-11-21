@@ -20,23 +20,23 @@
  <!-- Scripts: macros -->
  <manifest:file-entry manifest:full-path="Scripts/python/LoadPrices.py" manifest:media-type="application/binary"/>
 
- <!-- Scripts: libs: LibreOffice -->
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/__init__.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/Cell.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/CellRange.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/Controls.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/LibreOffice/Sheet.py" manifest:media-type="application/binary"/>
+ <!-- Scripts: libs -->
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/libreoffice" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/libreoffice/__init__.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/libreoffice/cell.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/libreoffice/cellrange.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/libreoffice/controls.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/libreoffice/datasheet.py" manifest:media-type="application/binary"/>
 
  <!-- Scripts: Sites -->
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Sites" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Sites/__init__.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Sites/Yahoo.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/sites" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/sites/__init__.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/sites/yahoo.py" manifest:media-type="application/binary"/>
 
  <!-- Scripts: Utils -->
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Web" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Web/__init__.py" manifest:media-type="application/binary"/>
- <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/Web/HttpAgent.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/web" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/web/__init__.py" manifest:media-type="application/binary"/>
+ <manifest:file-entry manifest:full-path="Scripts/python/pythonpath/web/httpagent.py" manifest:media-type="application/binary"/>
 
  <!-- Scripts: end -->
 

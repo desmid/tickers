@@ -3,8 +3,6 @@ import unittest
 import context
 from yahoo_json import *  #yahoo json strings
 
-from Sites.Yahoo import priceDict
-
 from sites.yahoo import PriceDict
 
 ###########################################################################

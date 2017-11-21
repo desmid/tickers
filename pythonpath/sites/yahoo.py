@@ -5,8 +5,8 @@ Logger.debug("Load: Sites.Yahoo")
 
 ###########################################################################
 import re
-from LibreOffice.Sheet import DataSheet, DataFrame
-from Web import HttpAgent
+from libreoffice import DataSheet, DataFrame
+from web import HttpAgent
 
 ###########################################################################
 class Yahoo(object):

@@ -1,12 +1,12 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: LibreOffice.CellRange")
+Logger.debug("Load: libreoffice.cellrange")
 
 ###########################################################################
 import re
 
-from LibreOffice.Cell import Cell
+from libreoffice import Cell
 
 class CellRange(object):
     """

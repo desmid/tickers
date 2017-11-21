@@ -47,8 +47,8 @@ Logger.info("Python %s", sys.version)
 Logger.info("New path: " + str(sys.path))
 
 # import embedded
-from Sites import Yahoo
-from LibreOffice.Controls import messageBox
+from sites import Yahoo
+from libreoffice.controls import messageBox
 
 ###########################################################################
 # the macros

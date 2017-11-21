@@ -1,7 +1,7 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: LibreOffice.Cell")
+Logger.debug("Load: libreoffice.cell")
 
 ###########################################################################
 import re
