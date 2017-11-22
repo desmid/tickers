@@ -54,7 +54,7 @@ class Yahoo(object):
         if not self.web.ok():
             raise KeyError("fetch URL {} FAILED".format(url))
 
-        pricedict = PriceDict(keyticker, text)
+        pricedict = PriceDict(text, keyticker)
         Logger.debug('pricedict: ' + str(pricedict))
 
         dataframe.update(pricedict)
@@ -174,10 +174,12 @@ class KeyTicker(object):
 class PriceDict(object):
     """
     Provides a read-only dict of spreadsheet cell value to Yahoo price
-    information from a Yahoo generated JSON string.
+    information from a Yahoo generated JSON string. The optional second
+    argument, keydict, provides an indirection on lookups; keys will be
+    looked up here first, then in the parsed price dict.
 
     Constructor
-      PriceDict(KeyTicker, text)
+      PriceDict(text, keydict=None)
 
     Operators
       PriceDict[key]  returns price list for that key:
@@ -206,7 +208,7 @@ class PriceDict(object):
     FORMATS  = ['%f', '%s']
     DEFAULTS = [0, 'n/a']
 
-    def __init__(self, key2ticker, text):
+    def __init__(self, text, key2ticker=None):
         self.key2ticker = key2ticker
         self.tick2price = self._parse_json(text)
 
@@ -233,7 +235,10 @@ class PriceDict(object):
 
     def __getitem__(self, key):
         try:
-            ticker = self.key2ticker[key]
+            if self.key2ticker is None:  #direct key
+                ticker = key
+            else:  #indirect key
+                ticker = self.key2ticker[key]
             return self.tick2price[ticker]
         except KeyError:
             if key.strip() != '':  #whitespace or empty
