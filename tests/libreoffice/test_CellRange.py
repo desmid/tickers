@@ -1,6 +1,5 @@
 import unittest
 
-import context
 from libreoffice.cellrange import CellRange
 
 ###########################################################################

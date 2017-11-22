@@ -1,7 +1,6 @@
 import unittest
 
-import context
-from yahoo_json import *  #yahoo json strings
+from .data_yahoo_json import *  #yahoo json strings
 
 from sites.yahoo import PriceDict
 
