@@ -12,7 +12,7 @@ DOC = XSCRIPTCONTEXT.getDocument()
 
 # logging
 LOGNAME = 'LoadPrices'
-LOGFILE = '/home/brown/TRADE/SOFTWARE/LibreOffice/out.log'
+LOGFILE = 'out.log'
 LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)-25s] %(message)s'
 LOGLEVEL = logging.DEBUG
 LOGENABLE = True  #set to False to disable logging to logfile
