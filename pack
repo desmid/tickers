@@ -1,6 +1,7 @@
 #!/bin/sh
 
-DEV=./dev
+#DEV=./dev
+DEV=.
 MACROS=LoadPrices.py
 
 MASTER=$DEV/Templates/empty.ods

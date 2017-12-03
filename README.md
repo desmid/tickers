@@ -125,10 +125,11 @@ or, if installed, use `nose2-3` (the Python 3 version of `nose` - see
 
 ### Install
 
-The demo includes a `pack` script which should be run in the *parent
-directory* above this top-level. It takes the vanilla spreadsheet
-`Templates/empty.ods`, inserts the code and `manifest.xml`, and writes a
-functioning spreadsheet into a new `test.ods` in the now current directory.
+The demo includes a `pack` script which should be run in the top-level
+directory. It takes the vanilla spreadsheet `Templates/empty.ods`, unpacks it
+into a directory `t`, injects the code and `manifest.xml` therein, and packs
+it all back up again into a functioning spreadsheet `test.ods` in the current
+directory (it does not change the files under Templates).
 
 ### Acknowledgements
 
