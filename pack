@@ -27,6 +27,6 @@ cp -fpr  $DEV/$MACROS $DEV/pythonpath $BUILD/Scripts/python
 
 rm -f $TARGET
 
-(cd $BUILD; $HOME/pub/bin/rpurge; zip -r ../$TARGET .)
+(cd $BUILD; ../rpurge; zip -r ../$TARGET .)
 
 ls -lt $TARGET*

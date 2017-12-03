@@ -1,0 +1,29 @@
+#!/bin/sh
+PATH=/bin:/usr/bin; export PATH
+
+rmflag=
+if [ $# -gt 0 ]; then
+    #if [ $1 = "-i" ]; then rmflag="-i"; fi
+    if [ $1 = "-i" ]; then
+        rmflag="-p"
+        shift
+    fi
+fi
+
+#echo $*; exit
+
+if [ $# -lt 1 ]; then set .; fi
+for i in $*; do
+    find $i \( \
+    	   -name core  \
+    	-o -name .\*~   \
+    	-o -name .\#\*   \
+    	-o -name \*~    \
+    	-o -name \#\*    \
+    	-o -name \*.dvi \
+    	-o -name \*.pyc \
+    \) -print | xargs -L1 -I{} $rmflag rm {}
+    find $i \( \
+           -name __pycache__ \
+    \) -print | xargs -L1 -I{} $rmflag rmdir {}
+done

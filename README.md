@@ -9,7 +9,7 @@ for amusement.
 
 To try a pre-built spreadsheet with a selection of tickers, load:
 
-  `Templates/test.ods`
+  `./test.ods`
 
 into LibreOffice (OpenOffice should also work but was not tested) and enable
 macros if necessary, then click some buttons.
@@ -75,15 +75,14 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
 
 <PRE>
      .
-     ├── LoadPrices.py
+     ├── LoadPrices.py            #the macros
      ├── README.md
      ├── Templates
-     │   ├── empty.ods
-     │   └── test.ods
+     │   └── empty.ods
      ├── manifest.xml
-     ├── nosetests
-     ├── pack
-     ├── pythonpath
+     ├── nosetests                #utility
+     ├── pack                     #utility
+     ├── pythonpath               #packages
      │   ├── libreoffice
      │   │   ├── __init__.py
      │   │   ├── cell.py
@@ -96,7 +95,9 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
      │   └── web
      │       ├── __init__.py
      │       └── httpagent.py
-     └── tests
+     ├── rpurge                   #utility
+     ├── test.ods                 #test spreadsheet
+     └── tests                    #unit tests
          ├── __init__.py
          ├── libreoffice
          │   ├── __init__.py
@@ -121,9 +122,9 @@ or, if installed, use `nose2-3` (the Python 3 version of `nose` - see
 
 The demo includes a `pack` script which should be run in the top-level
 directory. It takes the vanilla spreadsheet `Templates/empty.ods`, unpacks it
-into a directory `t`, injects the code and `manifest.xml` therein, and packs
-it all back up again into a functioning spreadsheet `test.ods` in the current
-directory (it does not change the files under Templates).
+into a directory `t`, injects the code and `manifest.xml`, and packs it all
+back up again into a functioning spreadsheet `test.ods` in the current
+directory.
 
 ### Acknowledgements
 
