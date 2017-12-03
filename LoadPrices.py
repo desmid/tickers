@@ -53,16 +53,20 @@ from libreoffice.controls import messageBox
 ###########################################################################
 # the macros
 ###########################################################################
-def get_yahoo_prices(*args):
+def get_yahoo_stocks(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get('Sheet1', keyrange='A2:A200', datacols=['B', 'C'])
+    yahoo.get_stocks('Sheet1', keyrange='A1:A200', datacols=['B', 'C'])
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
 def get_yahoo_fx(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get('Sheet1', keyrange='G2:G200', datacols=['H'])
-    yahoo.get('Sheet1', keyrange='J2:J200', datacols=['I'])
+    yahoo.get_fx('Sheet1', keyrange='E1:G200', datacols=['F'])
     messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
 
-g_exportedScripts = get_yahoo_prices, get_yahoo_fx,
+def get_yahoo_indices(*args):
+    yahoo = Yahoo(DOC)
+    yahoo.get_indices('Sheet1', keyrange='H1:H200', datacols=['I', 'J'])
+    messageBox(XSCRIPTCONTEXT, "Processing finished", "Status")
+
+g_exportedScripts = get_yahoo_stocks, get_yahoo_fx, get_yahoo_indices,
 ###########################################################################

@@ -14,10 +14,12 @@ class Yahoo(object):
     Spreadsheet driver for Yahoo queries.
 
     Methods
-      get(sheetname, keyrange, datacols)
+      get_stocks(sheetname, keyrange, datacols)
+      get_fx(sheetname, keyrange, datacols)
+      get_indices(sheetname, keyrange, datacols)
 
-         reads keyrange columns in sheetname, extracts Yahoo tickers,
-         assembles URL, fetches query, parses result, populates
+         read keyrange columns in sheetname, extract Yahoo tickers,
+         assemble URL, fetch query, parse result, populate
          keycols of spreadsheet.
 
     Raises
@@ -29,22 +31,41 @@ class Yahoo(object):
         self.doc = doc
         self.web = HttpAgent()
 
-    def get(self, sheetname='Sheet1', keyrange='A2:A200', datacols=['B']):
+    def get_stocks(self, *args, **kwargs):
+        self._get(*args, mode='stock', **kwargs)
+
+    def get_fx(self, *args, **kwargs):
+        self._get(*args, mode='fx', **kwargs)
+
+    def get_indices(self, *args, **kwargs):
+        self._get(*args, mode='index', **kwargs)
+
+    def _get(self, sheetname='Sheet1', keyrange='A2:A200', datacols=['B'],
+            mode='stock'):
+
         sheet = DataSheet(self.doc.getSheets().getByName(sheetname))
 
-        Logger.debug('keyrange:  ' + str(keyrange))
-        Logger.debug('datacols:  ' + str(datacols))
+        Logger.debug('keyrange: ' + str(keyrange))
+        Logger.debug('datacols: ' + str(datacols))
 
         keydata = sheet.read_column(keyrange, truncate=True)
         Logger.debug('keydata: ' + str(keydata))
 
-        dataframe = DataFrame(keydata, datacols)
+        if mode == 'stock':
+            keyticker = KeyTickerStock(keydata.rows())
+        elif mode == 'fx':
+            keyticker = KeyTickerFX(keydata.rows())
+        elif mode == 'index':
+            keyticker = KeyTickerIndex(keydata.rows())
+        else:
+            raise AttributeError("unknown mode '%s'" % str(mode))
+
+        Logger.debug('tickers: ' + str(keyticker.tickers()))
+
+        dataframe = DataFrame(keydata, keyticker, datacols)
         Logger.debug('dataframe: ' + str(dataframe))
 
         sheet.clear_dataframe(dataframe)
-
-        keyticker = KeyTicker(keydata.rows())
-        Logger.debug('tickers: ' + str(keyticker.tickers()))
 
         url = keyticker.url()
         Logger.debug('url: ' + url)
@@ -63,39 +84,29 @@ class Yahoo(object):
         sheet.write_dataframe(dataframe)
 
 ###########################################################################
-class KeyTicker(object):
+class KeyTickerBase(object):
     """
-    Provides a read-only dict of spreadsheet cell value to Yahoo tickers.
+    Base class provides a read-only dict of spreadsheet cell value to
+    Yahoo tickers.
 
     Constructor
       KeyTicker(list_of_string)
 
     Operators
-      KeyTicker[key]  returns ticker for that key or '' if unmatched.
-      len(Key)        returns number of stored tickers.
+      KeyTicker[key]     returns ticker for that key or '' if unmatched.
+      len(KeyTickerBase) returns number of stored tickers.
 
     Methods
+      keys()        returns keys.
+      items()       returns items.
+      values()      returns values.
       tickers()     returns stored tickers as list.
       url(tickers)  returns composed URL using tickers (or stored tickers
                     if no argument).
+
     """
 
     URL_BASE = 'http://query1.finance.yahoo.com/v7/finance/quote?'
-
-    #some patterns could be combined, but easier to test separately:
-
-    #EPIC
-    CRE_EPIC       = re.compile(r'^([A-Z0-9]{2,4})$')           # BP
-    CRE_EPIC_DOT   = re.compile(r'^([A-Z0-9]{2,4})\.$')         # BP.
-    CRE_EPIC_FLOOR = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')   # BP.L
-
-    #index
-    CRE_INDEX      = re.compile(r'^(\^[A-Z0-9]+)$')             # ^FTSE
-
-    #currency pair
-    CRE_FXPAIR_X   = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X
-    CRE_FXPAIR_SEP = re.compile(r'^([A-Z]{3})[:/]([A-Z]{3})$')  # EUR:GBP
-    CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
     def __init__(self, data=[]):
         self.key2tick = self._extract_tickers(data)
@@ -117,15 +128,28 @@ class KeyTicker(object):
     def __getitem__(self, key):
         return self.key2tick[key]
 
+    def keys(self): return self.key2tick.keys()
+    def items(self): return self.key2tick.items()
+    def values(self): return self.key2tick.values()
+
     def _extract_tickers(self, data):
         d = {}
         for key in data:
-            ticker = self._match_ticker(key)
+            ticker = self.match_ticker(key)
             if ticker != '':
                 d[key] = ticker
         return d
 
-    def _match_ticker(self, text=''):
+class KeyTickerStock(KeyTickerBase):
+    """
+    KeyTicker for stocks.
+    """
+    #patterns could be combined, but easier to test separately:
+    CRE_EPIC       = re.compile(r'^([A-Z0-9]{2,4})$')          # BP
+    CRE_EPIC_DOT   = re.compile(r'^([A-Z0-9]{2,4})\.$')        # BP.
+    CRE_EPIC_FLOOR = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L
+
+    def match_ticker(self, text=''):
         m = self.CRE_EPIC.search(text)
         if m:
             ticker = m.group(1)
@@ -143,13 +167,18 @@ class KeyTicker(object):
             ticker = m.group(1)
             Logger.debug('EPIC_FLOOR: %s => %s' % (text, ticker))
             return ticker
+        return ''
 
-        m = self.CRE_INDEX.search(text)
-        if m:
-            ticker = m.group(1)
-            Logger.debug('INDEX: %s => %s' % (text, ticker))
-            return ticker
+class KeyTickerFX(KeyTickerBase):
+    """
+    KeyTicker for FX currency pairs.
+    """
+    #patterns could be combined, but easier to test separately:
+    CRE_FXPAIR_X   = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X
+    CRE_FXPAIR_SEP = re.compile(r'^([A-Z]{3})[:/]([A-Z]{3})$')  # EUR:GBP
+    CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
+    def match_ticker(self, text=''):
         m = self.CRE_FXPAIR_X.search(text)
         if m:
             ticker = m.group(1)
@@ -167,7 +196,28 @@ class KeyTicker(object):
             ticker = m.group(1) + '=X'
             Logger.debug('FXPAIR_CH6: %s => %s' % (text, ticker))
             return ticker
+        return ''
 
+class KeyTickerIndex(KeyTickerBase):
+    """
+    KeyTicker for indices.
+    """
+    #patterns could be combined, but easier to test separately:
+    CRE_INDEX_HAT  = re.compile(r'^(\^[A-Z][A-Z0-9]{2,})$')  # ^FTSE
+    CRE_INDEX      = re.compile(r'^([A-Z][A-Z0-9]{2,})$')    # FTSE
+
+    def match_ticker(self, text=''):
+        m = self.CRE_INDEX_HAT.search(text)
+        if m:
+            ticker = m.group(1)
+            Logger.debug('INDEX_HAT: %s => %s' % (text, ticker))
+            return ticker
+
+        m = self.CRE_INDEX.search(text)
+        if m:
+            ticker = '^' + m.group(1)
+            Logger.debug('INDEX: %s => %s' % (text, ticker))
+            return ticker
         return ''
 
 ###########################################################################
@@ -185,7 +235,7 @@ class PriceDict(object):
       PriceDict[key]  returns price list for that key:
                         [regularMarketPrice, currency]
                       or a default list for an unmatched non-whitespace key.
-      len(priceDict)  returns number of key,price pairs.
+      len(PriceDict)  returns number of key,price pairs.
 
     Methods
       names()      returns list of column names.
