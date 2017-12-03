@@ -23,7 +23,7 @@ class Yahoo(object):
          keycols of spreadsheet.
 
     Raises
-      KeyError  if web fetch fails.
+      Warning  if web fetch fails.
 
     """
 
@@ -72,8 +72,10 @@ class Yahoo(object):
 
         text = self.web.fetch(url)
 
-        if not self.web.ok():
-            raise KeyError("fetch URL {} FAILED".format(url))
+        if self.web.failed():
+            msg = "Diagnostics: " + str(self.web)
+            Logger.error(msg)
+            raise Warning(msg)
 
         pricedict = PriceDict(text, keyticker)
         Logger.debug('pricedict: ' + str(pricedict))

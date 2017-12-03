@@ -45,14 +45,15 @@ class HttpAgent(object):
       returns 'no response' if URL cannot be retrieved after preset retries
       and timeouts, or is invalid.
 
-    ok()           returns True/False as fetch succeeded/failed
+    ok()           returns True/False as fetch succeeded/failed.
+    failed()       returns False/True as fetch succeeded/failed.
 
-    url()          returns original URL
-    real_url()     returns real URL retrieved
+    url()          returns original URL.
+    real_url()     returns real URL retrieved.
     status_code()  returns HTTP response code as integer (200, 404, etc.)
-    error()        returns exception/error condition
+    error()        returns exception/error condition.
     info()         returns server headers as a dict (Content-Type, etc.)
-    html()         returns already fetched web page
+    html()         returns already fetched web page.
 
     See: https://docs.python.org/3.4/howto/urllib2.html  (Python3)
          https://docs.python.org/2/howto/urllib2.html    (Python2)
@@ -168,6 +169,8 @@ class HttpAgent(object):
         if self.state['error'] == self.NoError: return True
         if self.state['html'] != self.Deft_Html: return True
         return False
+
+    def failed(self): return not self.ok()
 
     def html(self):        return self.state['html']
     def status_code(self): return self.state['status']

@@ -56,18 +56,27 @@ from libreoffice.controls import MessageBox
 ###########################################################################
 def get_yahoo_stocks(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get_stocks('Sheet1', keyrange='A1:A200', datacols=['B', 'C'])
-    MessageBox.show(XSCRIPTCONTEXT, "Processing finished", "Status")
+    try:
+        yahoo.get_stocks('Sheet1', keyrange='A1:A200', datacols=['B', 'C'])
+        MessageBox.show(XSCRIPTCONTEXT, "Processing finished", "Status")
+    except Warning as e:
+        MessageBox.show(XSCRIPTCONTEXT, str(e), "Web lookup error")
 
 def get_yahoo_fx(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get_fx('Sheet1', keyrange='E1:G200', datacols=['F'])
-    MessageBox.show(XSCRIPTCONTEXT, "Processing finished", "Status")
+    try:
+        yahoo.get_fx('Sheet1', keyrange='E1:G200', datacols=['F'])
+        MessageBox.show(XSCRIPTCONTEXT, "Processing finished", "Status")
+    except Warning as e:
+        MessageBox.show(XSCRIPTCONTEXT, str(e), "Web lookup error")
 
 def get_yahoo_indices(*args):
     yahoo = Yahoo(DOC)
-    yahoo.get_indices('Sheet1', keyrange='H1:H200', datacols=['I', 'J'])
-    MessageBox.show(XSCRIPTCONTEXT, "Processing finished", "Status")
+    try:
+        yahoo.get_indices('Sheet1', keyrange='H1:H200', datacols=['I', 'J'])
+        MessageBox.show(XSCRIPTCONTEXT, "Processing finished", "Status")
+    except Warning as e:
+        MessageBox.show(XSCRIPTCONTEXT, str(e), "Web lookup error")
 
 g_exportedScripts = get_yahoo_stocks, get_yahoo_fx, get_yahoo_indices,
 ###########################################################################
