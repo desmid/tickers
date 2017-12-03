@@ -15,7 +15,7 @@ LOGNAME = 'LoadPrices'
 LOGFILE = 'out.log'
 LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)-25s] %(message)s'
 LOGLEVEL = logging.DEBUG
-LOGENABLE = True  #set to False to disable logging to logfile
+LOGENABLE = True  #set to False to disable logfile
 
 # embedded pythonpath
 PYTHONPATH = '/Scripts/python/pythonpath'
@@ -31,6 +31,7 @@ def createLogger(logname, logfile, logformat, loglevel, enabled):
         Logger.addHandler(tmp)
     return Logger
 
+#insert embedded zip archive pythonpath
 def prependPath(doc, newpath):
     pythonpath = uno.fileUrlToSystemPath(doc.URL) + newpath
     if pythonpath not in sys.path:
