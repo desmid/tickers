@@ -75,13 +75,13 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
 
 <PRE>
      .
-     ├── LoadPrices.py            #the macros
+     ├── LoadPrices.py            #macros
      ├── README.md
      ├── Templates
-     │   └── empty.ods
-     ├── manifest.xml
-     ├── nosetests                #utility
-     ├── pack                     #utility
+     │   ├── empty.ods
+     │   └── manifest.xml
+     ├── nosetests
+     ├── pack
      ├── pythonpath               #packages
      │   ├── libreoffice
      │   │   ├── __init__.py
@@ -95,7 +95,7 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
      │   └── web
      │       ├── __init__.py
      │       └── httpagent.py
-     ├── rpurge                   #utility
+     ├── rpurge
      ├── test.ods                 #test spreadsheet
      └── tests                    #unit tests
          ├── __init__.py

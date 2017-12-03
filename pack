@@ -18,7 +18,7 @@ unzip  $MASTER -d $BUILD
 
 #manifest
 rm -fr   $BUILD/META-INF/*
-cp -fp   $DEV/manifest.xml $BUILD/META-INF
+cp -fp   $DEV/Templates/manifest.xml $BUILD/META-INF
 
 #code
 rm -fr   $BUILD/Scripts/python
