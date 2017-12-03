@@ -58,13 +58,7 @@ Placing multiple files under `Scripts/python` presents a problem as they are
 not added to the Python package search path. This is of course relative to the
 root of the zip archive, and not to any place on the host file system. It
 turns out that a relative path inside the zipfile can be inserted dynamically
-into the Python path, allowing a sensible embedded package hierarchy.
-
-The solution was found in a technical report: "Umstieg von Basic auf Python
-mit AOO unter Linux, Ein Erfahrungsbericht mit Makros, die in einem
-Calc-Dokument eingebettet sind"
-[pdf](https://www.uni-due.de/~abi070/files/OOo/Erfahrungsbericht.pdf "") by
-Volker Lenhardt at Universität Duisburg-Essen, Germany.
+into the Python path, allowing a sensible embedded package hierarchy [1].
 
 ### External dependencies
 
@@ -137,5 +131,13 @@ The tool was inspired by `simpleYahooPriceScrape.ods` on the
 [LemonFool UK investor site](https://www.lemonfool.co.uk "LemonFool"). The LO/OO
 messagebox functionality was adapted from that tool, but otherwise the design
 is different.
+
+[1] The solution to the pythonpath embedding problem was found in a technical
+report:
+
+"Umstieg von Basic auf Python mit AOO unter Linux, Ein Erfahrungsbericht mit
+Makros, die in einem Calc-Dokument eingebettet sind." February, 2016. Volker
+Lenhardt, Universität Duisburg-Essen, Germany.
+[pdf](https://www.uni-due.de/~abi070/files/OOo/Erfahrungsbericht.pdf "Umstieg von Basic auf Python mit AOO unter Linux")
 
 END
