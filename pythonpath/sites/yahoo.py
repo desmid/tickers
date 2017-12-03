@@ -298,34 +298,38 @@ class PriceDict(object):
     def _parse_json(self, text=''):
         data = {}
 
-        m = re.search(r'.*?\[(.*?)\].*', text)
+        #extract inner dict key:value "result":[] which is an array
+        #containing one dict
+        m = re.search(r'"result":\[([^\]]*)\]', text)
         if not m: return data
-        text = m.group(1)
+
+        #strip double quotes throughout
+        text = m.group(1).replace('"','')
 
         while text:
-            m = re.search(r'.*?{(.*?)\}(.*)', text)
+            #extract one ticker's dict from array
+            m = re.search(r'{(.*?)}(.*)', text)
             if not m: break
 
-            symbolData = m.group(1)
+            #split into key:value pairs
+            keyvals = m.group(1).split(',')
             symbol, price, currency = '', '', ''
 
-            for element in symbolData.split(','):
-                element = element.replace('"','')
-
+            for pair in keyvals:
                 try:
-                    key,val = element.split(':', 1)
+                    key,val = pair.split(':', 1)
                 except:
                     continue
 
-                if 'symbol' == key:
+                if key == 'symbol':
                     symbol = val
                     continue
 
-                if 'regularMarketPrice' == key:
+                if key == 'regularMarketPrice':
                     price = val
                     continue
 
-                if 'currency' == key:
+                if key == 'currency':
                     currency = val
                     continue
 
