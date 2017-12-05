@@ -17,6 +17,33 @@ LO_CLEAR_FLAGS = (VALUE|STRING)
 from libreoffice import CellRange
 
 ###########################################################################
+def asCellRange(item, template=None):
+    """
+    asCellRange(string)     return a new CellRange from a string.
+    asCellRange(Cell)       return a new CellRange from a Cell.
+    asCellRange(CellRange)  return a new CellRange from a CellRange.
+    asCellRange(list)       return a list of new CellRanges from a list.
+    """
+    if isinstance(item, str):
+        cr = CellRange(item)
+        if template is not None:
+            cr.update_from(template)
+        return cr
+    if isinstance(item, Cell):
+        cr = CellRange(item)
+        if template is not None:
+            cr.update_from(template)
+        return cr
+    if isinstance(item, CellRange):
+        cr = item
+        if template is not None:
+            cr.update_from(template)
+        return cr
+    if isinstance(item, list):
+        return [asCellRange(i, template) for i in item]
+    raise TypeError("unexpected type '%s'" % str(item))
+
+###########################################################################
 class DataColumn(object):
     """
     Represents a spreadsheet column range as a CellRange object and a list
@@ -49,7 +76,7 @@ class DataColumn(object):
         return self.vec
 
     def copy_empty(self, colname):
-        newcells = DataSheet.asCellRange(colname, template=self.cellrange)
+        newcells = asCellRange(colname, template=self.cellrange)
         return DataColumn(newcells, [''] * len(self.vec))
 
     def __setitem__(self, i, val):
@@ -132,9 +159,6 @@ class DataSheet(object):
     CellRange as its position (currently DataColumn).
 
     Methods
-      asCellRange(string)  return a CellRange from a string.
-      asCellRange(list)    return a list of CellRanges from list of strings.
-
       read_column(colid)   return DataColumn from spreadsheet.
 
       clear_cell(col, row)           clear cell at numeric (col,row).
@@ -151,30 +175,9 @@ class DataSheet(object):
     def __init__(self, sheet):
         self.sheet = sheet
 
-    @classmethod
-    def asCellRange(cls, item, template=None):
-        if isinstance(item, str):
-            cr = CellRange(item)
-            if template is not None:
-                cr.update_from(template)
-            return cr
-        if isinstance(item, Cell):
-            cr = CellRange(item)
-            if template is not None:
-                cr.update_from(template)
-            return cr
-        if isinstance(item, CellRange):
-            cr = item
-            if template is not None:
-                cr.update_from(template)
-            return cr
-        if isinstance(item, list):
-            return [cls.asCellRange(i, template) for i in item]
-        raise TypeError("unexpected type '%s'" % str(item))
-
     def _get_cells(self, arg):
         if isinstance(arg, str):
-            return self.asCellRange(arg)
+            return asCellRange(arg)
         if isinstance(arg, CellRange):
             return arg
         if isinstance(arg, DataColumn):
