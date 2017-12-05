@@ -23,6 +23,13 @@ def asCellRange(item, template=None):
     asCellRange(Cell)       return a new CellRange from a Cell.
     asCellRange(CellRange)  return a new CellRange from a CellRange.
     asCellRange(list)       return a list of new CellRanges from a list.
+    asCellRange(tuple)      return a list of new CellRanges from a tuple.
+
+    The optional 'template' argument is an existing CellRange supplying
+    default positional values for the new cellRange.
+
+    Raises:
+      TypeError if given an inappropriate type.
     """
     if isinstance(item, str):
         cr = CellRange(item)
@@ -39,7 +46,7 @@ def asCellRange(item, template=None):
         if template is not None:
             cr.update_from(template)
         return cr
-    if isinstance(item, list):
+    if isinstance(item, list) or isinstance(item, tuple):
         return [asCellRange(i, template) for i in item]
     raise TypeError("unexpected type '%s'" % str(item))
 
@@ -240,6 +247,8 @@ class DataSheet(object):
             raise TypeError("unexpected type '%s'" % str(col))
         if not isinstance(row, int):
             raise TypeError("unexpected type '%s'" % str(row))
+        if value is None:
+            return
         cell = self.sheet.getCellByPosition(col, row)
         #Logger.debug("write_row({},{})={}".format(start_col, i, value))
         if isinstance(value, float):
