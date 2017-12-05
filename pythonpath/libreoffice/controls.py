@@ -4,7 +4,7 @@ Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: libreoffice.controls")
 
 ###########################################################################
-#Code heavily adapted from LemonFool:SimpleYahooPriceScrape.py
+#Code heavily adapted from LemonFool:SimpleYahooPriceScrape.ods
 ###########################################################################
 from com.sun.star.awt.VclWindowPeerAttribute import \
     OK, OK_CANCEL, YES_NO, YES_NO_CANCEL, RETRY_CANCEL, DEF_OK, DEF_CANCEL, \
@@ -31,34 +31,32 @@ class MessageBox(object):
         doc = XSCRIPTCONTEXT.getDocument()
         parent = doc.CurrentController.Frame.ContainerWindow
         try:
-            con = XSCRIPTCONTEXT.getComponentContext()
-            val = MessageBox._newbox(parent, con, text, title, value)
+            ctx = XSCRIPTCONTEXT.getComponentContext()
+            val = cls._show_newbox(parent, ctx, text, title, value)
         except Exception as e:
-            Logger.debug(str(e))
-            val = MessageBox._legacybox(parent, text, title, value)
+            Logger.debug(e)
+            val = cls._show_legacybox(parent, text, title, value)
         return val
 
-    ###########################################################################
-    # LO:
-    #   - works with LO 5
-    # OO:
-    #   - works with OO 4
-    def _newbox(parent, con, text, title, value):
-        tk = con.getServiceManager().createInstanceWithContext(
-            "com.sun.star.awt.Toolkit", con
+    ########################################
+    # LO - works with LO 5
+    # OO - works with OO 4
+    @classmethod
+    def _show_newbox(cls, parent, ctx, text, title, value):
+        tk = ctx.getServiceManager().createInstanceWithContext(
+            "com.sun.star.awt.Toolkit", ctx
         )
         box = tk.createMessageBox(
-            parent, 0, MessageBox.RETURN[value], title, text
+            parent, 0, cls.RETURN[value], title, text
         )
         return box.execute()
 
-    ###########################################################################
-    # LO:
-    #   - works with LO 4 early versions
-    #   - fails with LO 4.2.3.3 onwards
-    # OO:
-    #   - works with OO Portable 3.2
-    def _legacybox(parent, text, title, value):
+    ########################################
+    # LO - works with LO 4 early versions
+    #    - fails with LO 4.2.3.3 onwards
+    # OO - works with OO Portable 3.2
+    @classmethod
+    def _show_legacybox(cls, parent, text, title, value):
         wd = WindowDescriptor()
         wd.Type = 1  #MODALTOP
         wd.WindowServiceName = "messbox"
