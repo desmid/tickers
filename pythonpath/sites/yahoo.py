@@ -65,7 +65,7 @@ class Yahoo(object):
         dataframe = DataFrame(keydata, keyticker, datacols)
         Logger.debug('dataframe: ' + str(dataframe))
 
-        sheet.clear_dataframe(dataframe)
+        sheet.clear_frame(dataframe)
 
         url = keyticker.url()
         Logger.debug('url: ' + url)
@@ -83,7 +83,7 @@ class Yahoo(object):
         dataframe.update(pricedict)
         Logger.debug('dataframe: ' + str(dataframe))
 
-        sheet.write_dataframe(dataframe)
+        sheet.write_frame(dataframe)
 
 ###########################################################################
 class KeyTickerBase(object):

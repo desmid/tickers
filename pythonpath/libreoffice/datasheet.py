@@ -56,10 +56,10 @@ class DataColumn(object):
       len(DataColumn)     returns number of data rows
 
     Methods
-      cells()             returns CellRange object
-      rows()              returns data list
-      copy_empty(column)  returns an empty DataColumn of same dimension
-                          using colname to contruct its CellRange.
+      cells()              returns CellRange object
+      rows()               returns data list
+      copy_empty(colname)  returns an empty DataColumn of same dimension
+                           using colname to contruct its CellRange.
 
     Raises
       IndexError
@@ -164,11 +164,11 @@ class DataSheet(object):
       clear_cell(col, row)           clear cell at numeric (col,row).
       clear_column(DataFrame, colid) clear column given by 'colid' using
                                      DataFrame to select cells.
-      clear_dataframe(DataFrame)     clear cells given by DataFrame.
+      clear_frame(DataFrame)         clear cells given by DataFrame.
 
       write_cell(col, row, value)  write value to cell at numeric (col,row).
       write_column(DataFrame, DataColumn)     write column from DataColumn.
-      write_dataframe(DataFrame)   write cells from DataFrame using
+      write_frame(DataFrame)       write cells from DataFrame using
                                    DataFrame to select cells.
     """
 
@@ -229,7 +229,7 @@ class DataSheet(object):
             if frame.has_data(i):
                 self.clear_cell(start_col, row)
 
-    def clear_dataframe(self, frame):
+    def clear_frame(self, frame):
         if not isinstance(frame, DataFrame):
             raise TypeError("unexpected type '%s'" % str(frame))
         for column in frame.columns():
@@ -264,7 +264,7 @@ class DataSheet(object):
                 continue
             self.write_cell(start_col, row, column[i])
 
-    def write_dataframe(self, frame):
+    def write_frame(self, frame):
         if not isinstance(frame, DataFrame):
             raise TypeError("unexpected type '%s'" % str(frame))
         for column in frame.columns():
