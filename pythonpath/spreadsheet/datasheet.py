@@ -132,11 +132,12 @@ class DataFrame(object):
         return self.keyvec[i]
 
     def update(self, datadict):
-        for i,key in enumerate(self.keycol.rows()):
-            for j,column in enumerate(self.cframe):
+        #iterate by row and terminate inner on column index failure
+        for r,key in enumerate(self.keycol.rows()):
+            for c,column in enumerate(self.cframe):
                 try:
-                    column[i] = datadict[key][j]
-                    Logger.debug("update: '%s'  (%d,%d)" % (key, i, j))
+                    column[r] = datadict[key][c]
+                    Logger.debug("update: '%s'  (%d,%d)" % (key, c, r))
                 except IndexError:
                     break
 

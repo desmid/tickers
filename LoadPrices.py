@@ -4,7 +4,8 @@ import logging
 import platform  #for logging system
 
 ###########################################################################
-# globals
+# logging
+# https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
 ###########################################################################
 LOGNAME = 'LoadPrices'
 LOGFILE = 'out.log'
@@ -12,11 +13,6 @@ LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)
 LOGLEVEL = logging.DEBUG
 LOGENABLE = True  #set to False to disable logfile
 
-# embedded pythonpath
-PYTHONPATH = '/Scripts/python/pythonpath'
-
-###########################################################################
-# https://docs.python.org/3/howto/logging.html#logging-advanced-tutorial
 def createLogger(logname, logfile, logformat, loglevel, enabled):
     Logger = logging.getLogger(logname)
     Logger.setLevel(loglevel)
@@ -26,34 +22,37 @@ def createLogger(logname, logfile, logformat, loglevel, enabled):
         Logger.addHandler(tmp)
     return Logger
 
+Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL, LOGENABLE)
+
+Logger.info("Start")
+Logger.info("Platform: " + ' '.join(platform.uname()))
+Logger.info("Python: " + str(sys.version))
+
+###########################################################################
+# embedded zip archive pythonpath
+PYTHONPATH = '/Scripts/python/pythonpath'
+
 #insert embedded zip archive pythonpath
 def prependPath(newpath):
-    # LO/OO spreadsheet
     import uno
     doc = XSCRIPTCONTEXT.getDocument()
     pythonpath = uno.fileUrlToSystemPath(doc.URL) + newpath
     if pythonpath not in sys.path:
         sys.path.insert(0, pythonpath)
 
-###########################################################################
-Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL, LOGENABLE)
-
 prependPath(PYTHONPATH)
 
-Logger.info("Start")
-Logger.info(str(platform.uname()))
-Logger.info("Python %s", sys.version)
-Logger.info("New path: " + str(sys.path))
+Logger.info("Path: " + str(sys.path))
 
 # import embedded
 from sites import Yahoo
 from spreadsheet.api.factory import Spreadsheet
 
-DOC = Spreadsheet('libreoffice', docroot=XSCRIPTCONTEXT)
-
 ###########################################################################
 # the macros
 ###########################################################################
+DOC = Spreadsheet('libreoffice', docroot=XSCRIPTCONTEXT)
+
 def get_yahoo_stocks(*args):
     yahoo = Yahoo(DOC)
     try:
