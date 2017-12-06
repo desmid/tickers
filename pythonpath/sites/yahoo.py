@@ -1,11 +1,11 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: Sites.Yahoo")
+Logger.debug("Load: sites.yahoo")
 
 ###########################################################################
 import re
-from libreoffice import DataSheet, DataFrame
+from spreadsheet import DataSheet, DataFrame
 from web import HttpAgent
 
 ###########################################################################
@@ -43,7 +43,7 @@ class Yahoo(object):
     def _get(self, sheetname='Sheet1', keyrange='A2:A200', datacols=['B'],
             mode='stock'):
 
-        sheet = DataSheet(self.doc.getSheets().getByName(sheetname))
+        sheet = DataSheet(self.doc, sheetname)
 
         Logger.debug('keyrange: ' + str(keyrange))
         Logger.debug('datacols: ' + str(datacols))

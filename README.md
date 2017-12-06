@@ -74,39 +74,43 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
 ### Layout
 
 <PRE>
-     .
-     ├── LoadPrices.py            #macros
-     ├── README.md
-     ├── Templates
-     │   ├── empty.ods
-     │   └── manifest.xml
-     ├── nosetests
-     ├── pack
-     ├── pythonpath               #packages
-     │   ├── libreoffice
-     │   │   ├── __init__.py
-     │   │   ├── cell.py
-     │   │   ├── cellrange.py
-     │   │   ├── controls.py
-     │   │   └── datasheet.py
-     │   ├── sites
-     │   │   ├── __init__.py
-     │   │   └── yahoo.py
-     │   └── web
-     │       ├── __init__.py
-     │       └── httpagent.py
-     ├── rpurge
-     ├── test.ods                 #test spreadsheet
-     └── tests                    #unit tests
-         ├── __init__.py
-         ├── libreoffice
-         │   ├── __init__.py
-         │   ├── test_Cell.py
-         │   └── test_CellRange.py
-         └── sites
-             ├── __init__.py
-             ├── data_yahoo_json.py
-             └── test_yahoo_PriceDict.py
+      .
+      ├── LoadPrices.py            #macros
+      ├── README.md
+      ├── Templates
+      │   ├── empty.ods
+      │   └── manifest.xml
+      ├── nosetests
+      ├── out.log
+      ├── pack
+      ├── pythonpath               #packages
+      │   ├── sites
+      │   │   ├── __init__.py
+      │   │   └── yahoo.py
+      │   ├── spreadsheet
+      │   │   ├── __init__.py
+      │   │   ├── api
+      │   │   │   ├── __init__.py
+      │   │   │   ├── factory.py
+      │   │   │   └── libreoffice.py
+      │   │   ├── cell.py
+      │   │   ├── cellrange.py
+      │   │   └── datasheet.py
+      │   └── web
+      │       ├── __init__.py
+      │       └── httpagent.py
+      ├── rpurge
+      ├── test.ods                 #test spreadsheet
+      └── tests                    #unit tests
+          ├── __init__.py
+          ├── libreoffice
+          │   ├── __init__.py
+          │   ├── test_Cell.py
+          │   └── test_CellRange.py
+          └── sites
+              ├── __init__.py
+              ├── data_yahoo_json.py
+              └── test_yahoo_PriceDict.py
 </PRE>
 
 ### Tests

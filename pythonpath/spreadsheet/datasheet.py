@@ -1,20 +1,9 @@
 ###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
-Logger.debug("Load: libreoffice.datasheet")
+Logger.debug("Load: spreadsheet.datasheet")
 
-###########################################################################
-# http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
-# https://api.libreoffice.org/docs/idl/ref/namespacecom_1_1sun_1_1star_1_1sheet_1_1CellFlags.html
-###########################################################################
-
-import uno
-from com.sun.star.sheet.CellFlags import VALUE, DATETIME, STRING, ANNOTATION, \
-    FORMULA, HARDATTR, STYLES, OBJECTS, EDITATTR, FORMATTED
-
-LO_CLEAR_FLAGS = (VALUE|STRING)
-
-from libreoffice import CellRange
+from spreadsheet import CellRange
 
 ###########################################################################
 def asCellRange(item, template=None):
@@ -160,7 +149,7 @@ class DataSheet(object):
     """
     Represents a spreadsheet with basic column and block operations.
 
-      DataSheet(libreoffice_sheet_object)
+      DataSheet(spreadsheet_sheet_object)
 
     Let 'colid' represent any type convertible to CellRange or containing a
     CellRange as its position (currently DataColumn).
@@ -179,8 +168,9 @@ class DataSheet(object):
                                    DataFrame to select cells.
     """
 
-    def __init__(self, sheet):
-        self.sheet = sheet
+    def __init__(self, doc, sheetname):
+        self.doc = doc
+        self.sheet = sheetname
 
     def _get_cells(self, arg):
         if isinstance(arg, str):
@@ -200,7 +190,7 @@ class DataSheet(object):
         return i
 
     def read_cell(self, col, row):
-        return self.sheet.getCellByPosition(col, row).getString()
+        return self.doc.read_cell_string(self.sheet, col, row)
 
     def read_column(self, column, truncate=False):
         cells = self._get_cells(column)
@@ -222,8 +212,7 @@ class DataSheet(object):
             raise TypeError("unexpected type '%s'" % str(col))
         if not isinstance(row, int):
             raise TypeError("unexpected type '%s'" % str(row))
-        cell = self.sheet.getCellByPosition(col, row)
-        cell.clearContents(LO_CLEAR_FLAGS)
+        self.doc.clear_cell(self.sheet, col, row)
         Logger.debug("clear_cell({},{})".format(col, row))
 
     def clear_column(self, frame, column):
@@ -249,18 +238,17 @@ class DataSheet(object):
             raise TypeError("unexpected type '%s'" % str(row))
         if value is None:
             return
-        cell = self.sheet.getCellByPosition(col, row)
         #Logger.debug("write_row({},{})={}".format(start_col, i, value))
-        if isinstance(value, float):
-            cell.Value = value
-        elif isinstance(value, int):
-            cell.Value = value
-        elif isinstance(value, bool):
-            cell.Value = (0, 1)[value]
-        elif isinstance(value, str):
-            cell.String = value
-        else:
-            cell.String = str(value)
+        if isinstance(value, float) or isinstance(value, int):
+            self.doc.write_cell_numeric(self.sheet, col, row, value)
+            return
+        if isinstance(value, bool):
+            self.doc.write_cell_boolean(self.sheet, col, row, value)
+            return
+        if isinstance(value, str):
+            self.doc.write_cell_string(self.sheet, col, row, value)
+            return
+        self.doc.write_cell_string(self.sheet, col, row, str(value))
 
     def write_column(self, frame, column):
         if not isinstance(frame, DataFrame):

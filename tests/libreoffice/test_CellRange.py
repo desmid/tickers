@@ -1,6 +1,6 @@
 import unittest
 
-from libreoffice.cellrange import CellRange
+from spreadsheet.cellrange import CellRange
 
 ###########################################################################
 class test_CellRange_constructor(unittest.TestCase):

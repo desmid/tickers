@@ -1,6 +1,6 @@
 import unittest
 
-from libreoffice.cell import Cell
+from spreadsheet.cell import Cell
 
 ###########################################################################
 class test_Cell_constructor(unittest.TestCase):
