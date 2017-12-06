@@ -7,16 +7,31 @@ Logger.debug("Load: spreadsheet.api.libreoffice")
 # http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
 # https://api.libreoffice.org/docs/idl/ref/namespacecom_1_1sun_1_1star_1_1sheet_1_1CellFlags.html
 ###########################################################################
-class LibreOffice(object):
-    from com.sun.star.awt.VclWindowPeerAttribute import \
-        OK, OK_CANCEL, YES_NO, YES_NO_CANCEL, RETRY_CANCEL, \
-        DEF_OK, DEF_CANCEL, DEF_RETRY, DEF_YES, DEF_NO
+from . factory import SpreadsheetAPI
 
+class LibreOffice(SpreadsheetAPI):
     from com.sun.star.sheet.CellFlags import \
         VALUE, DATETIME, STRING, ANNOTATION, FORMULA, HARDATTR, \
         STYLES, OBJECTS, EDITATTR, FORMATTED
 
     Clear_Flags = (VALUE|STRING)
+
+    from com.sun.star.awt.VclWindowPeerAttribute import \
+        OK, OK_CANCEL, YES_NO, YES_NO_CANCEL, RETRY_CANCEL, \
+        DEF_OK, DEF_CANCEL, DEF_RETRY, DEF_YES, DEF_NO
+
+    MsgBox_Return = {
+        OK:            1,
+        OK_CANCEL:     2,
+        YES_NO:        3,
+        YES_NO_CANCEL: 4,
+        RETRY_CANCEL:  5,
+        DEF_OK:        6,
+        DEF_CANCEL:    7,
+        DEF_RETRY:     8,
+        DEF_YES:       9,
+        DEF_NO:        10,
+    }
 
     def __init__(self, docroot=None):
         if docroot is None:
@@ -31,42 +46,33 @@ class LibreOffice(object):
         sheet = self.doc.getSheets().getByName(sheetname)
         return sheet.getCellByPosition(col, row)
 
+    #@override
     def clear_cell(self, sheetname, col, row):
         cell = self._get_cell(sheetname, col, row)
         cell.clearContents(self.Clear_Flags)
 
+    #@override
     def read_cell_string(self, sheetname, col, row):
         cell = self._get_cell(sheetname, col, row)
         return cell.getString()
 
+    #@override
     def write_cell_numeric(self, sheetname, col, row, value):
         cell = self._get_cell(sheetname, col, row)
         cell.Value = value
 
+    #@override
     def write_cell_boolean(self, sheetname, col, row, value):
         cell = self._get_cell(sheetname, col, row)
-        cell.Value = (0, 1)[value]
+        cell.Value = self._as_boolean(value)
 
+    #@override
     def write_cell_string(self, sheetname, col, row, value):
         cell = self._get_cell(sheetname, col, row)
         cell.String = value
 
-    ########################################
-    #popup return codes available to caller
-    MsgBox_Return = {
-        OK:            1,
-        OK_CANCEL:     2,
-        YES_NO:        3,
-        YES_NO_CANCEL: 4,
-        RETRY_CANCEL:  5,
-        DEF_OK:        6,
-        DEF_CANCEL:    7,
-        DEF_RETRY:     8,
-        DEF_YES:       9,
-        DEF_NO:        10,
-    }
-
-    def showbox(self, text, title, value=OK):
+    #@override
+    def show_box(self, text, title, value=OK):
         parent = self.doc.CurrentController.Frame.ContainerWindow
         try:
             ctx = self.docroot.getComponentContext()

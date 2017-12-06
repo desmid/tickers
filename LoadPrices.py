@@ -46,36 +46,36 @@ Logger.info("Path: " + str(sys.path))
 
 # import embedded
 from sites import Yahoo
-from spreadsheet.api.factory import Spreadsheet
+from spreadsheet.api.factory import spreadsheet_api
 
 ###########################################################################
 # the macros
 ###########################################################################
-DOC = Spreadsheet('libreoffice', docroot=XSCRIPTCONTEXT)
+API = spreadsheet_api('libreoffice', docroot=XSCRIPTCONTEXT)
 
 def get_yahoo_stocks(*args):
-    yahoo = Yahoo(DOC)
+    yahoo = Yahoo(API)
     try:
         yahoo.get_stocks('Sheet1', keyrange='A1:A200', datacols=['B', 'C'])
-        DOC.showbox("Processing finished", "Status")
+        API.show_box("Processing finished", "Status")
     except Warning as e:
-        DOC.showbox(str(e), "Web lookup error")
+        API.show_box(str(e), "Web lookup error")
 
 def get_yahoo_fx(*args):
-    yahoo = Yahoo(DOC)
+    yahoo = Yahoo(API)
     try:
         yahoo.get_fx('Sheet1', keyrange='E1:G200', datacols=['F'])
-        DOC.showbox("Processing finished", "Status")
+        API.show_box("Processing finished", "Status")
     except Warning as e:
-        DOC.showbox(str(e), "Web lookup error")
+        API.show_box(str(e), "Web lookup error")
 
 def get_yahoo_indices(*args):
-    yahoo = Yahoo(DOC)
+    yahoo = Yahoo(API)
     try:
         yahoo.get_indices('Sheet1', keyrange='H1:H200', datacols=['I', 'J'])
-        DOC.showbox("Processing finished", "Status")
+        API.show_box("Processing finished", "Status")
     except Warning as e:
-        DOC.showbox(str(e), "Web lookup error")
+        API.show_box(str(e), "Web lookup error")
 
 g_exportedScripts = get_yahoo_stocks, get_yahoo_fx, get_yahoo_indices,
 ###########################################################################
