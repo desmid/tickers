@@ -14,34 +14,23 @@ class Yahoo(object):
     Spreadsheet driver for Yahoo queries.
 
     Methods
-      get_stocks(sheetname, keyrange, datacols)
-      get_fx(sheetname, keyrange, datacols)
-      get_indices(sheetname, keyrange, datacols)
+      get(mode, sheetname, keyrange, datacols)
 
-         read keyrange columns in sheetname, extract Yahoo tickers,
-         assemble URL, fetch query, parse result, populate
-         keycols of spreadsheet.
+      for mode in one of { 'stock', 'fx', 'index' }, read keyrange columns
+      in sheetname, extract Yahoo tickers, assemble URL, fetch query, parse
+      result, populate datacols of spreadsheet.
 
     Raises
-      Warning  if web fetch fails.
-
+      AttributeError  if called with unknown mode.
+      Warning         if web fetch fails.
     """
 
     def __init__(self, doc=None):
         self.doc = doc
         self.web = HttpAgent()
 
-    def get_stocks(self, *args, **kwargs):
-        self._get(*args, mode='stock', **kwargs)
-
-    def get_fx(self, *args, **kwargs):
-        self._get(*args, mode='fx', **kwargs)
-
-    def get_indices(self, *args, **kwargs):
-        self._get(*args, mode='index', **kwargs)
-
-    def _get(self, sheetname='Sheet1', keyrange='A2:A200', datacols=['B'],
-            mode='stock'):
+    def get(self, mode='stock', sheetname='Sheet1', keyrange='A2:A200',
+            datacols=['B']):
 
         sheet = DataSheet(self.doc, sheetname)
 
