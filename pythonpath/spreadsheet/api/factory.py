@@ -1,14 +1,14 @@
-###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: spreadsheet.api.factory")
 
-###########################################################################
+
 def spreadsheet_api(name, **kwargs):
     if name == 'libreoffice':
         from . libreoffice import LibreOffice
         return LibreOffice(**kwargs)
     raise AttributeError("unknown spreadsheet type '%s'" % name)
+
 
 class SpreadsheetAPI(object):
 
@@ -41,5 +41,3 @@ class SpreadsheetAPI(object):
         if not isinstance(value, bool):
             raise TypeError("not a boolean '%s'" % str(value))
         return (0, 1)[value]
-
-###########################################################################

@@ -1,14 +1,10 @@
-###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: sites.yahoo")
 
-###########################################################################
 import re
 from spreadsheet import DataSheet, DataFrame
 from web import HttpAgent
-
-###########################################################################
 
 
 class Yahoo(object):
@@ -80,8 +76,6 @@ class Yahoo(object):
         Logger.debug('dataframe: ' + str(dataframe))
 
         sht.write_frame(dataframe)
-
-###########################################################################
 
 
 class KeyTickerBase(object):
@@ -225,8 +219,6 @@ class KeyTickerIndex(KeyTickerBase):
             return ticker
         return ''
 
-###########################################################################
-
 
 class PriceDict(object):
     """
@@ -350,5 +342,3 @@ class PriceDict(object):
             text = m.group(2)
 
         return data
-
-###########################################################################

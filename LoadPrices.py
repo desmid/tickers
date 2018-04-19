@@ -84,8 +84,10 @@ def get_yahoo_indices(*args):
         API.show_box(str(e), "Web error")
 
 
-g_exportedScripts = \
-    get_yahoo_stocks, \
-    get_yahoo_fx, \
+g_exportedScripts = (
+    get_yahoo_stocks,
+    get_yahoo_fx,
     get_yahoo_indices,
+)
+
 ###########################################################################

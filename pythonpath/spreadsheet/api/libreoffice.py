@@ -1,4 +1,3 @@
-###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: spreadsheet.api.libreoffice")
@@ -7,14 +6,16 @@ Logger.debug("Load: spreadsheet.api.libreoffice")
 # http://www.openoffice.org/api/docs/common/ref/com/sun/star/sheet/CellFlags.html
 # https://api.libreoffice.org/docs/idl/ref/namespacecom_1_1sun_1_1star_1_1sheet_1_1CellFlags.html
 ###########################################################################
+
 from . factory import SpreadsheetAPI
+
 
 class LibreOffice(SpreadsheetAPI):
     from com.sun.star.sheet.CellFlags import \
         VALUE, DATETIME, STRING, ANNOTATION, FORMULA, HARDATTR, \
         STYLES, OBJECTS, EDITATTR, FORMATTED
 
-    Clear_Flags = (VALUE|STRING)
+    Clear_Flags = (VALUE | STRING)
 
     from com.sun.star.awt.VclWindowPeerAttribute import \
         OK, OK_CANCEL, YES_NO, YES_NO_CANCEL, RETRY_CANCEL, \
@@ -100,7 +101,7 @@ class LibreOffice(SpreadsheetAPI):
     # OO - works with OO Portable 3.2
     def _show_legacybox(self, parent, text, title, value):
         wd = WindowDescriptor()
-        wd.Type = 1  #MODALTOP
+        wd.Type = 1  # MODALTOP
         wd.WindowServiceName = "messbox"
         wd.ParentIndex = -1
         wd.Parent = parent
@@ -110,5 +111,3 @@ class LibreOffice(SpreadsheetAPI):
         box.setMessageText(text)
         box.setCaptionText(title)
         return box.execute()
-
-###########################################################################

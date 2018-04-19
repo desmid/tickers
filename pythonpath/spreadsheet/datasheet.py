@@ -1,11 +1,8 @@
-###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: spreadsheet.datasheet")
 
 from spreadsheet import CellRange
-
-###########################################################################
 
 
 def asCellRange(item, template=None):
@@ -40,8 +37,6 @@ def asCellRange(item, template=None):
     if isinstance(item, list) or isinstance(item, tuple):
         return [asCellRange(i, template) for i in item]
     raise TypeError("unexpected type '%s'" % str(item))
-
-###########################################################################
 
 
 class DataColumn(object):
@@ -91,8 +86,6 @@ class DataColumn(object):
     def __repr__(self):
         s = ','.join([str(c) for c in self.vec])
         return str(self.cellrange) + ' [' + s + ']'
-
-###########################################################################
 
 
 class DataFrame(object):
@@ -150,8 +143,6 @@ class DataFrame(object):
     def __repr__(self):
         s = ','.join([str(f) for f in self.cframe])
         return '[' + s + ']'
-
-###########################################################################
 
 
 class DataSheet(object):
@@ -272,5 +263,3 @@ class DataSheet(object):
             raise TypeError("unexpected type '%s'" % str(frame))
         for column in frame.columns():
             self.write_column(frame, column)
-
-###########################################################################

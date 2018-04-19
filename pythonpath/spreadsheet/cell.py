@@ -1,12 +1,11 @@
-###########################################################################
 import logging
 Logger = logging.getLogger('LoadPrices')
 Logger.debug("Load: spreadsheet.cell")
 
-###########################################################################
 import re
 
 ORD_A = ord('A')
+
 
 class Cell(object):
     """
@@ -56,8 +55,10 @@ class Cell(object):
 
     def posn(self):
         col, row = self.col, self.row
-        if col is None: col = 0
-        if row is None: row = 0
+        if col is None:
+            col = 0
+        if row is None:
+            row = 0
         return (col, row)
 
     def name(self): return self._posn2name((self.col, self.row))
@@ -72,20 +73,20 @@ class Cell(object):
         return (self.col, self.row)
 
     def _set_by_posn(self, col, row):
-        #check type
+        # check type
         if not (isinstance(col, int) and isinstance(row, int)):
             raise TypeError("cell positions must be integers")
-        #check sign
+        # check sign
         if col < 0 or row < 0:
             raise TypeError("cell positions cannot be negative")
         self.col = col
         self.row = row
 
     def _set_by_name(self, name=''):
-        #check type
+        # check type
         if not isinstance(name, str):
             raise TypeError("cell name must be a string")
-        #check not a cell range
+        # check not a cell range
         if name.find(':') > -1:
             raise TypeError("cell name must not be a range")
 
@@ -98,22 +99,22 @@ class Cell(object):
 
         m = re.search(r'^([A-Z]+)$', name)
         if m:
-            c,r = self._name2posn(name)
+            c, r = self._name2posn(name)
             self.col, self.row = c, None
             return
 
         m = re.search(r'^([0-9]+)?$', name)
         if m:
-            #check numeric row part
+            # check numeric row part
             if int(m.group(1)) < 1:
                 raise TypeError("cell name row part must be integer")
-            c,r = self._name2posn(name)
+            c, r = self._name2posn(name)
             self.col, self.row = None, r
             return
 
         m = re.search(r'^(?:[A-Z]+)([0-9]+)$', name)
         if m:
-            #check numeric row part
+            # check numeric row part
             if int(m.group(1)) < 1:
                 raise TypeError("cell name row part must be integer")
             self.col, self.row = self._name2posn(name)
@@ -144,7 +145,7 @@ class Cell(object):
           _name2posn('AAA')  =>  (702,0)
 
         """
-        #0-based arithmetic
+        # 0-based arithmetic
         c, r = 0, 0
         while len(n) > 0:
             v = ord(n[0])
@@ -153,11 +154,13 @@ class Cell(object):
                 break
             c = 26*c + v-ORD_A+1
             n = n[1:]
-        if c > 0: c -= 1
-        if r > 0: r -= 1
+        if c > 0:
+            c -= 1
+        if r > 0:
+            r -= 1
         return (c, r)
 
-    def _posn2name(self, p=(0,0)):
+    def _posn2name(self, p=(0, 0)):
         """
         Convert spreadsheet cell positions as a pair (column, row) and
         return a cell name as a string: 'A1'
@@ -181,11 +184,13 @@ class Cell(object):
           _posn2name((703,0))  =>  'AAB1'
         """
         try:
-            col,row = p
+            col, row = p
         except:
             raise TypeError("cell positions must an integer pair")
-        if col is None: col = 0
-        if row is None: row = 0
+        if col is None:
+            col = 0
+        if row is None:
+            row = 0
         col += 1
         name = ""
         while col > 0:
@@ -203,5 +208,3 @@ class Cell(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-
-###########################################################################
