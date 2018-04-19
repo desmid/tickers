@@ -9,15 +9,17 @@ from spreadsheet import DataSheet, DataFrame
 from web import HttpAgent
 
 ###########################################################################
+
+
 class Yahoo(object):
     """
     Spreadsheet driver for Yahoo queries.
 
     Methods
-      get(mode, sheetname, keyrange, datacols)
+      get(mode, sheet, keyrange, datacols)
 
       for mode in one of { 'stock', 'fx', 'index' }, read keyrange columns
-      in sheetname, extract Yahoo tickers, assemble URL, fetch query, parse
+      in sheet, extract Yahoo tickers, assemble URL, fetch query, parse
       result, populate datacols of spreadsheet.
 
     Raises
@@ -29,15 +31,20 @@ class Yahoo(object):
         self.doc = doc
         self.web = HttpAgent()
 
-    def get(self, mode='stock', sheetname='Sheet1', keyrange='A2:A200',
-            datacols=['B']):
+    def stock(self, *args, **kwargs): self.get('stock', *args, **kwargs)
 
-        sheet = DataSheet(self.doc, sheetname)
+    def fx(self, *args, **kwargs): self.get('fx', *args, **kwargs)
+
+    def index(self, *args, **kwargs): self.get('index', *args, **kwargs)
+
+    def get(self, mode, sheet='Sheet1', keyrange='A2:A200', datacols=['B']):
+
+        sht = DataSheet(self.doc, sheet)
 
         Logger.debug('keyrange: ' + str(keyrange))
         Logger.debug('datacols: ' + str(datacols))
 
-        keydata = sheet.read_column(keyrange, truncate=True)
+        keydata = sht.read_column(keyrange, truncate=True)
         Logger.debug('keydata: ' + str(keydata))
 
         if mode == 'stock':
@@ -54,7 +61,7 @@ class Yahoo(object):
         dataframe = DataFrame(keydata, keyticker, datacols)
         Logger.debug('dataframe: ' + str(dataframe))
 
-        sheet.clear_frame(dataframe)
+        sht.clear_frame(dataframe)
 
         url = keyticker.url()
         Logger.debug('url: ' + url)
@@ -72,9 +79,11 @@ class Yahoo(object):
         dataframe.update(pricedict)
         Logger.debug('dataframe: ' + str(dataframe))
 
-        sheet.write_frame(dataframe)
+        sht.write_frame(dataframe)
 
 ###########################################################################
+
+
 class KeyTickerBase(object):
     """
     Base class provides a read-only dict of spreadsheet cell value to
@@ -120,7 +129,9 @@ class KeyTickerBase(object):
         return self.key2tick[key]
 
     def keys(self): return self.key2tick.keys()
+
     def items(self): return self.key2tick.items()
+
     def values(self): return self.key2tick.values()
 
     def _extract_tickers(self, data):
@@ -131,13 +142,14 @@ class KeyTickerBase(object):
                 d[key] = ticker
         return d
 
+
 class KeyTickerStock(KeyTickerBase):
     """
     KeyTicker for stocks.
     """
-    #patterns could be combined, but easier to test separately:
-    CRE_EPIC       = re.compile(r'^([A-Z0-9]{2,4})$')          # BP
-    CRE_EPIC_DOT   = re.compile(r'^([A-Z0-9]{2,4})\.$')        # BP.
+    # patterns could be combined, but easier to test separately:
+    CRE_EPIC = re.compile(r'^([A-Z0-9]{2,4})$')          # BP
+    CRE_EPIC_DOT = re.compile(r'^([A-Z0-9]{2,4})\.$')        # BP.
     CRE_EPIC_FLOOR = re.compile(r'^([A-Z0-9]{2,4}\.[A-Z]+)$')  # BP.L
 
     def match_ticker(self, text=''):
@@ -160,12 +172,13 @@ class KeyTickerStock(KeyTickerBase):
             return ticker
         return ''
 
+
 class KeyTickerFX(KeyTickerBase):
     """
     KeyTicker for FX currency pairs.
     """
-    #patterns could be combined, but easier to test separately:
-    CRE_FXPAIR_X   = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X
+    # patterns could be combined, but easier to test separately:
+    CRE_FXPAIR_X = re.compile(r'^([A-Z]{6}=X)$')              # EURGBP=X
     CRE_FXPAIR_SEP = re.compile(r'^([A-Z]{3})[:/]([A-Z]{3})$')  # EUR:GBP
     CRE_FXPAIR_CH6 = re.compile(r'^([A-Z]{6})$')                # EURGBP
 
@@ -189,13 +202,14 @@ class KeyTickerFX(KeyTickerBase):
             return ticker
         return ''
 
+
 class KeyTickerIndex(KeyTickerBase):
     """
     KeyTicker for indices.
     """
-    #patterns could be combined, but easier to test separately:
-    CRE_INDEX_HAT  = re.compile(r'^(\^[A-Z][A-Z0-9]{2,})$')  # ^FTSE
-    CRE_INDEX      = re.compile(r'^([A-Z][A-Z0-9]{2,})$')    # FTSE
+    # patterns could be combined, but easier to test separately:
+    CRE_INDEX_HAT = re.compile(r'^(\^[A-Z][A-Z0-9]{2,})$')  # ^FTSE
+    CRE_INDEX = re.compile(r'^([A-Z][A-Z0-9]{2,})$')    # FTSE
 
     def match_ticker(self, text=''):
         m = self.CRE_INDEX_HAT.search(text)
@@ -212,6 +226,8 @@ class KeyTickerIndex(KeyTickerBase):
         return ''
 
 ###########################################################################
+
+
 class PriceDict(object):
     """
     Provides a read-only dict of spreadsheet cell value to Yahoo price
@@ -245,8 +261,8 @@ class PriceDict(object):
       IndexError  if names/formats/defaults index lookup fails.
     """
 
-    NAMES    = ['regularMarketPrice', 'currency']
-    FORMATS  = ['%f', '%s']
+    NAMES = ['regularMarketPrice', 'currency']
+    FORMATS = ['%f', '%s']
     DEFAULTS = [0, 'n/a']
 
     def __init__(self, text, key2ticker=None):
@@ -254,15 +270,18 @@ class PriceDict(object):
         self.tick2price = self._parse_json(text)
 
     def names(self, i=None):
-        if i is None: return self.NAMES
+        if i is None:
+            return self.NAMES
         return self.NAMES[i]
 
     def formats(self, i=None):
-        if i is None: return self.FORMATS
+        if i is None:
+            return self.FORMATS
         return self.FORMATS[i]
 
     def defaults(self, i=None):
-        if i is None: return self.DEFAULTS
+        if i is None:
+            return self.DEFAULTS
         return self.DEFAULTS[i]
 
     def data(self):
@@ -276,39 +295,41 @@ class PriceDict(object):
 
     def __getitem__(self, key):
         try:
-            if self.key2ticker is None:  #direct key
+            if self.key2ticker is None:  # direct key
                 ticker = key
-            else:  #indirect key
+            else:  # indirect key
                 ticker = self.key2ticker[key]
             return self.tick2price[ticker]
         except KeyError:
-            if key.strip() != '':  #whitespace or empty
+            if key.strip() != '':  # whitespace or empty
                 return self.defaults()
         return ''
 
     def _parse_json(self, text=''):
         data = {}
 
-        #extract inner dict key:value "result":[] which is an array
-        #containing one dict
+        # extract inner dict key:value "result":[] which is an array
+        # containing one dict
         m = re.search(r'"result":\[([^\]]*)\]', text)
-        if not m: return data
+        if not m:
+            return data
 
-        #strip double quotes throughout
-        text = m.group(1).replace('"','')
+        # strip double quotes throughout
+        text = m.group(1).replace('"', '')
 
         while text:
-            #extract one ticker's dict from array
+            # extract one ticker's dict from array
             m = re.search(r'{(.*?)}(.*)', text)
-            if not m: break
+            if not m:
+                break
 
-            #split into key:value pairs
+            # split into key:value pairs
             keyvals = m.group(1).split(',')
             symbol, price, currency = '', '', ''
 
             for pair in keyvals:
                 try:
-                    key,val = pair.split(':', 1)
+                    key, val = pair.split(':', 1)
                 except:
                     continue
 

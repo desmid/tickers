@@ -10,7 +10,8 @@ LOGNAME = 'LoadPrices'
 LOGFILE = 'out.log'
 LOGFORMAT = '%(asctime)s %(levelname)5s [%(filename)-15s %(lineno)4s %(funcName)-25s] %(message)s'
 LOGLEVEL = logging.DEBUG
-LOGENABLED = True  #set to False to disable logfile
+LOGENABLED = True  # set to False to disable logfile
+
 
 def createLogger(logname, logfile, logformat, loglevel, enabled):
     Logger = logging.getLogger(logname)
@@ -20,6 +21,7 @@ def createLogger(logname, logfile, logformat, loglevel, enabled):
         tmp.setFormatter(logging.Formatter(logformat))
         Logger.addHandler(tmp)
     return Logger
+
 
 Logger = createLogger(LOGNAME, LOGFILE, LOGFORMAT, LOGLEVEL, LOGENABLED)
 
@@ -32,12 +34,14 @@ Logger.info("Python: " + str(sys.version))
 ###########################################################################
 PYTHONPATH = '/Scripts/python/pythonpath'
 
+
 def prependPath(newpath):
     import uno
     doc = XSCRIPTCONTEXT.getDocument()
     pythonpath = uno.fileUrlToSystemPath(doc.URL) + newpath
     if pythonpath not in sys.path:
         sys.path.insert(0, pythonpath)
+
 
 prependPath(PYTHONPATH)
 
@@ -52,22 +56,36 @@ from spreadsheet.api.factory import spreadsheet_api
 ###########################################################################
 API = spreadsheet_api('libreoffice', docroot=XSCRIPTCONTEXT)
 
-def macro(cls, *args, **kwargs):
-    c = cls(API)
-    try:
-        c.get(*args, **kwargs)
-        API.show_box("Processing finished", "Status")
-    except Warning as e:
-        API.show_box(str(e), "Web lookup error")
 
 def get_yahoo_stocks(*args):
-    macro(Yahoo, 'stock', 'Sheet1', keyrange='A1:A200', datacols=['B', 'C'])
+    get = Yahoo(API)
+    try:
+        get.stock(sheet='Sheet1', keyrange='A1:A200', datacols=['B', 'C'])
+        API.show_box("Processing finished", "Status")
+    except Warning as e:
+        API.show_box(str(e), "Web error")
+
 
 def get_yahoo_fx(*args):
-    macro(Yahoo, 'fx',    'Sheet1', keyrange='E1:G200', datacols=['F'])
+    get = Yahoo(API)
+    try:
+        get.fx(sheet='Sheet1', keyrange='E1:G200', datacols=['F'])
+        API.show_box("Processing finished", "Status")
+    except Warning as e:
+        API.show_box(str(e), "Web error")
+
 
 def get_yahoo_indices(*args):
-    macro(Yahoo, 'index', 'Sheet1', keyrange='H1:H200', datacols=['I', 'J'])
+    get = Yahoo(API)
+    try:
+        get.index(sheet='Sheet1', keyrange='H1:H200', datacols=['I', 'J'])
+        API.show_box("Processing finished", "Status")
+    except Warning as e:
+        API.show_box(str(e), "Web error")
 
-g_exportedScripts = get_yahoo_stocks, get_yahoo_fx, get_yahoo_indices,
+
+g_exportedScripts = \
+    get_yahoo_stocks, \
+    get_yahoo_fx, \
+    get_yahoo_indices,
 ###########################################################################
