@@ -6,6 +6,8 @@ Logger.debug("Load: spreadsheet.datasheet")
 from spreadsheet import CellRange
 
 ###########################################################################
+
+
 def asCellRange(item, template=None):
     """
     asCellRange(string)     return a new CellRange from a string.
@@ -40,6 +42,8 @@ def asCellRange(item, template=None):
     raise TypeError("unexpected type '%s'" % str(item))
 
 ###########################################################################
+
+
 class DataColumn(object):
     """
     Represents a spreadsheet column range as a CellRange object and a list
@@ -89,6 +93,8 @@ class DataColumn(object):
         return str(self.cellrange) + ' [' + s + ']'
 
 ###########################################################################
+
+
 class DataFrame(object):
     """
     Represents a set of spreadsheet column ranges as a list of DataColumn
@@ -110,11 +116,11 @@ class DataFrame(object):
     def __init__(self, keycolumn, keyvals, datacols):
         self.keycol = keycolumn
         self.keyvec = self.set_keymask(keyvals)
-        self.cframe = [ keycolumn.copy_empty(c) for c in datacols ]
+        self.cframe = [keycolumn.copy_empty(c) for c in datacols]
 
     def set_keymask(self, keyvals):
         vec = [True] * len(self.keycol)
-        for i,key in enumerate(self.keycol.rows()):
+        for i, key in enumerate(self.keycol.rows()):
             try:
                 keyvals[key]
             except KeyError:
@@ -132,9 +138,9 @@ class DataFrame(object):
         return self.keyvec[i]
 
     def update(self, datadict):
-        #iterate by row and terminate inner on column index failure
-        for r,key in enumerate(self.keycol.rows()):
-            for c,column in enumerate(self.cframe):
+        # iterate by row and terminate inner on column index failure
+        for r, key in enumerate(self.keycol.rows()):
+            for c, column in enumerate(self.cframe):
                 try:
                     column[r] = datadict[key][c]
                     Logger.debug("update: '%s'  (%d,%d)" % (key, c, r))
@@ -146,6 +152,8 @@ class DataFrame(object):
         return '[' + s + ']'
 
 ###########################################################################
+
+
 class DataSheet(object):
     """
     Represents a spreadsheet with basic column and block operations.
@@ -195,7 +203,7 @@ class DataSheet(object):
 
     def read_column(self, column, truncate=False):
         cells = self._get_cells(column)
-        ((start_col,start_row), (end_col,end_row)) = cells.posn()
+        ((start_col, start_row), (end_col, end_row)) = cells.posn()
         data = [
             self.read_cell(start_col, row)
             for row in range(start_row, end_row+1)
@@ -204,8 +212,8 @@ class DataSheet(object):
             length = self._find_length(data)
             data = data[:length]
             if length > 0:
-                end_row = start_row + length -1
-            cells = CellRange(start_col,start_row, end_col,end_row)
+                end_row = start_row + length - 1
+            cells = CellRange(start_col, start_row, end_col, end_row)
         return DataColumn(cells, data)
 
     def clear_cell(self, col, row):
@@ -221,8 +229,8 @@ class DataSheet(object):
             raise TypeError("unexpected type '%s'" % str(frame))
         cells = self._get_cells(column)
         #Logger.debug('clear_column: ' + str(cells))
-        ((start_col,start_row), (_,end_row)) = cells.posn()
-        for i,row in enumerate(range(start_row, end_row+1)):
+        ((start_col, start_row), (_, end_row)) = cells.posn()
+        for i, row in enumerate(range(start_row, end_row+1)):
             if frame.has_data(i):
                 self.clear_cell(start_col, row)
 
@@ -239,25 +247,22 @@ class DataSheet(object):
             raise TypeError("unexpected type '%s'" % str(row))
         if value is None:
             return
-        #Logger.debug("write_row({},{})={}".format(start_col, i, value))
-        if isinstance(value, float) or isinstance(value, int):
+        #Logger.debug("write_cell({},{})={}".format(col, row, value))
+        try:
+            value = float(value)
             self.doc.write_cell_numeric(self.sheet, col, row, value)
             return
-        if isinstance(value, bool):
-            self.doc.write_cell_boolean(self.sheet, col, row, value)
-            return
-        if isinstance(value, str):
-            self.doc.write_cell_string(self.sheet, col, row, value)
-            return
-        self.doc.write_cell_string(self.sheet, col, row, str(value))
+        except ValueError:
+            pass
+        self.doc.write_cell_string(self.sheet, col, row, value)
 
     def write_column(self, frame, column):
         if not isinstance(frame, DataFrame):
             raise TypeError("unexpected type '%s'" % str(frame))
         cells = self._get_cells(column)
         #Logger.debug('write_column: ' + str(cells))
-        ((start_col,start_row), (_,end_row)) = cells.posn()
-        for i,row in enumerate(range(start_row, end_row+1)):
+        ((start_col, start_row), (_, end_row)) = cells.posn()
+        for i, row in enumerate(range(start_row, end_row+1)):
             if not frame.has_data(i):
                 continue
             self.write_cell(start_col, row, column[i])
