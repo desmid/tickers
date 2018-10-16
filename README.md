@@ -1,9 +1,11 @@
 ### Introduction
 
-LibreOffice/OpenOffice macros and associated Python packages for scraping
-Yahoo prices for: stock tickers, currency pairs, indices. A work in progress -
-the code works in live spreadsheets, but this is essentially a demo repository
-for amusement.
+This code provides LibreOffice/OpenOffice (LO/OO) macros and associated Python
+packages for scraping Yahoo prices for stock tickers, currency pairs, or
+indices.
+
+It is a work in progress - the code works in live spreadsheets, but this is
+essentially a demo.
 
 ### Run the demo spreadsheet
 
@@ -19,12 +21,18 @@ LO/OO.
 
 ### Functional requirements
 
-- Update a LO/OO spreadsheet containing columns of Yahoo tickers with a button
-  that populates specified columns with market price and currency.
-- Data columns will be in register with the ticker column, typically adjacent,
-  but may be anywhere else in the sheet and in any order.
-- Recognise a ticker in a spreadsheet cell as a distinct uppercased word
-  of form:
+- Populate a LO/OO spreadsheet containing columns of Yahoo tickers with their
+  market price and currency.
+  
+- The data values will be fetched from Yahoo when the appropriate button is
+  clicked.
+
+- The output data columns will usually lie alongside the ticker column, but
+  may be anywhere else in the sheet and the columns can be in any order.
+
+- A ticker in a spreadsheet cell should be recognised as a distinct uppercased
+  word of form:
+  
   <PRE>
     Stock            FX pair              Index
     -------------------------------------------
@@ -33,26 +41,38 @@ LO/OO.
     BP.L             EUR:USD
                      EURUSD
   </PRE>
+
 - Ignore other text not matching these types of pattern.
+
 - Web fetches should be robust and produce an informative message on failure.
   
 ### Design requirements
 
-- Macros must be embedded within the spreadsheet.
+- The application should be self-contained, i.e., macros must be embedded
+  within the spreadsheet not stored in external files.
+
 - Macros must use human-readable spreadsheet coordinates like `A1`,
   `B10:B100`, `C`.
-- Spreadsheet operations should be abstracted behind a facade.
-- Code should be structured and reusable, not a monolithic blob.
-- Code should be extendable to other data sources.
-- Code should use a logging facility.
+
+- Spreadsheet operations should be abstracted for code portability to other
+  systems.
+
+- Code should be structured and extendable to other data sources.
+
+- Code shoud have an optional logging facility for debugging.
 
 ### Design issues
 
 LO/OO Python macro bindings in a spreadsheet can reference an external system
-directory called `pythonpath`. Spreadsheet embedded macros are implemented in
-an `ods` spreadsheet in a different way: the spreadsheet file is a zip archive
-with Python macros typically placed under `Scripts/python` in a single file
-with appropriate entries in `META-INF/manifest.xml`.
+directory called `pythonpath`, but this would break the design requirement of
+being self-contained.
+
+Alternatively, spreadsheet embedded macros can be implemented in an `ods`
+spreadsheet in a different way: the spreadsheet file is a zip archive with
+Python macros typically placed under `Scripts/python` in a single file with
+appropriate entries in `META-INF/manifest.xml`.
+
+Problem:
 
 Placing multiple files under `Scripts/python` presents a problem as they are
 not added to the Python package search path. This is of course relative to the
@@ -113,7 +133,7 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
               └── test_yahoo_PriceDict.py
 </PRE>
 
-### Tests
+### Unit tests
 
 In the top-level directory, run:
 
@@ -143,6 +163,6 @@ report:
 "Umstieg von Basic auf Python mit AOO unter Linux, Ein Erfahrungsbericht mit
 Makros, die in einem Calc-Dokument eingebettet sind." February, 2016. Volker
 Lenhardt, Universität Duisburg-Essen, Germany.
-[pdf](https://www.uni-due.de/~abi070/files/OOo/Erfahrungsbericht.pdf "Umstieg von Basic auf Python mit AOO unter Linux")
+\[[pdf](https://www.uni-due.de/~abi070/files/OOo/Erfahrungsbericht.pdf "Umstieg von Basic auf Python mit AOO unter Linux")\]
 
 END
