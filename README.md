@@ -100,7 +100,6 @@ into the Python path, allowing a sensible embedded package hierarchy [1].
       ├── Templates
       │   ├── empty.ods
       │   └── manifest.xml
-      ├── nosetests
       ├── out.log
       ├── pack
       ├── pythonpath               #packages
@@ -139,8 +138,7 @@ In the top-level directory, run:
 
   `python3 -m unittest discover -v`
 
-or, if installed, use `nose2-3` (the Python 3 version of `nose` - see
-`./nosetests` for usage).
+or, if installed, use `nosetests` for python 3.
 
 ### Install
 
