@@ -2,4 +2,4 @@ language: python
 ipython:
     - 3.6
 script:
-    - nose2-3
+    - nosetests
