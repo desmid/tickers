@@ -1,5 +1,0 @@
-#!/bin/sh
-PROJECT=$HOME/TRADE/SOFTWARE/LibreOffice/dev
-echo -n "Running: "; python3 --version
-echo "Project:" $PROJECT
-nose2-3 -s $PROJECT "$@"
